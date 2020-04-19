@@ -1,3 +1,17 @@
 .numeric {
   text-align: end;
 }
+
+body {
+  background-color: #6c757d;
+}
+
+.container {
+  background-color: #fff;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"] {
+  font-weight: bold;
+}
