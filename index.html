@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Loan Amortization Calculator</title>
+
+    <!-- Compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="/app/css/app.css" />
+  </head>
+  <body>
+    <div class="col-sm-12">
+      <h2 class="header">Loan Amortization Calculator</h2>
+      <div class="card horizontal">
+        <div class="card-stacked">
+          <div class="card-content">
+            <p></p>
+            <div class="row">
+              <div class="col-sm-6">
+                <form class="">
+                  <div class="row">
+                    <div class="form-group col-sm-6">
+                      <label class="active" for="loan_amount"
+                        >Loan Amount</label
+                      >
+                      <input
+                        id="loan_amount"
+                        type="text"
+                        class="form-control numeric"
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-sm-6">
+                      <label class="active" for="interest_rate"
+                        >Annual Interest Rate</label
+                      >
+                      <input
+                        id="interest_rate"
+                        type="text"
+                        class="form-control numeric"
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-sm-6">
+                      <label class="active" for="loan_period"
+                        >Loan period in years</label
+                      >
+                      <input
+                        id="loan_period"
+                        type="number"
+                        class="form-control numeric"
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-sm-6">
+                      <label class="active" for="loan_start_date"
+                        >Start date of loan</label
+                      >
+                      <input
+                        id="loan_start_date"
+                        type="date"
+                        class="form-control date"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <!-- <button
+                      class="btn waves-effect waves-light"
+                      type="button"
+                      name="action"
+                    >
+                      Calculate
+                    </button> -->
+                  </div>
+                </form>
+              </div>
+
+              <div class="col s6">
+                <form class="">
+                  <div class="row">
+                    <div class="form-group col-sm-6">
+                      <label class="active" for="emi_amount"
+                        >Scheduled monthly payment</label
+                      >
+                      <input
+                        id="emi_amount"
+                        type="text"
+                        class="form-control numeric"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-sm-6">
+                      <label class="active" for="number_of_payments"
+                        >Scheduled number of payments</label
+                      >
+                      <input
+                        id="number_of_payments"
+                        type="text"
+                        class="form-control numeric"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-sm-6">
+                      <label class="active" for="actual_number_of_payments"
+                        >Actual number of payments</label
+                      >
+                      <input
+                        id="actual_number_of_payments"
+                        type="text"
+                        class="form-control numeric"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-sm-6">
+                      <label class="active" for="total_early_payments"
+                        >Total of early payments</label
+                      >
+                      <input
+                        id="total_early_payments"
+                        type="text"
+                        class="form-control numeric"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-sm-6">
+                      <label class="active" for="total_interest"
+                        >Total interest</label
+                      >
+                      <input
+                        id="total_interest"
+                        type="text"
+                        class="form-control numeric"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="amort_table">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="text-center">No</th>
+            <th class="text-center">Payment Date</th>
+            <th class="text-right">Beginning Balance</th>
+            <th class="text-right">Scheduled Payment</th>
+            <th class="text-right">Extra Payment</th>
+            <th class="text-right">Total Payment</th>
+            <th class="text-right">Principle</th>
+            <th class="text-right">Intesrest</th>
+            <th class="text-right">Ending Balance</th>
+          </tr>
+        </thead>
+
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+    <script src="/app/js/app.js"></script>
+  </body>
+</html>
