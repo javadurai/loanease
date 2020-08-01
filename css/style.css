@@ -12,12 +12,19 @@ body {
 
 input[type="text"],
 input[type="date"],
-input[type="number"] {
+input[type="number"],
+.input-group-text {
   font-weight: bold;
 }
 
-.main-flex {
+.hide {
+  display: none;
+}
+
+.main-flex,
+.loan-calculation-header {
   display: flex;
+  width: 100%;
 }
 
 .main-data-picker,
@@ -25,7 +32,9 @@ input[type="number"] {
   width: 50%;
 }
 
-.main-chart {
+.main-chart,
+.loan-calculation-text-section,
+.loan-calculation-chart-section {
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
