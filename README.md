@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://javadurai.github.io/loan-amotization-calculator/)
 
-Loan Amortization Planer is a simple vannila JavaScript based loan amortization planner application. It helps to calculate.
+Loan Amortization Planer is a simple vanila JavaScript based loan amortization planner application. It helps to calculate.
 
 - EMI of an loan
 - Planning part payments of loan with scheduled intervals (Monthly, Quarterly and Yearly)
