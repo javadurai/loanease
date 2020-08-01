@@ -9,7 +9,7 @@ Loan Amortization Planer is a simple vannila JavaScript based loan amortization 
 - Planning ad-hoc part payments
 - Helps calculating the impact after part-payments
 
-Live Demo: https://javadurai.github.io/loan-amotization-calculator/
+Live Site: https://javadurai.github.io/loan-amotization-calculator/
 
 ### EMI calculator fields - basic
 
