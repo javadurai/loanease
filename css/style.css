@@ -27,9 +27,11 @@ input[type="number"],
   width: 100%;
 }
 
-.main-data-picker,
+.main-data-picker {
+  width: 60%;
+}
 .main-chart {
-  width: 50%;
+  width: 40%;
 }
 
 .main-chart,
