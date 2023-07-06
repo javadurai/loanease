@@ -3,6 +3,32 @@ const AMOUNT_FORMAT = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+const data = {
+  labels: ["Principal Amount", "Total Interest"],
+  datasets: [
+    {
+      data: [0, 0],
+      backgroundColor: ["#28a745", "#dd5182"],
+    },
+  ],
+};
+
+const options = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "bottom",
+    },
+  },
+};
+
+const pieChart = new Chart(document.getElementById("chart-area"), {
+  type: "pie",
+  data: data,
+  options: options,
+});
+
 const month = new Array();
 month[0] = "January";
 month[1] = "February";
@@ -104,7 +130,7 @@ function calculateEmiAmount() {
     loanStartDate = loanStartDateField.value;
     partPayment = partPaymentsField.value;
     isPartPaymentEnabled = partPayment != "off";
-    document.getElementById("part_payment_hdr").style.display = isPartPaymentEnabled ? "block" : "none";
+    document.getElementById("part_payment_hdr").style.display = isPartPaymentEnabled ? "revert" : "none";
 
     document.querySelectorAll(".scheduled_payment_section").forEach((item) => {
       item.style.display = partPayment == "scheduled_plan" ? null : "none";
@@ -143,9 +169,9 @@ function calculateEmiAmount() {
     }
 
     // Write EMI field
-    emiAmountField.value = AMOUNT_FORMAT.format(emi);
+    emiAmountField.innerHTML = AMOUNT_FORMAT.format(emi);
     loanAmountField.value = AMOUNT_FORMAT.format(loanAmount);
-    numberOfPaymentsField.value = nom;
+    numberOfPaymentsField.innerHTML = nom;
 
     const dateParts = loanStartDate.split("-");
     let emiDate = new Date(dateParts[1], month.indexOf(dateParts[0]), 1);
@@ -197,20 +223,20 @@ function calculateEmiAmount() {
     }
 
     if (amortSchedule.length > 0) {
-      amortTable.style.display = "block";
+      amortTable.style.display = "revert";
 
       var tableBody = "";
       amortSchedule.forEach((schedule, index) => {
-        tableBody += "<tr class='" + (schedule.extra_payment && isPartPaymentEnabled ? "table-success" : "") + "' >";
+        tableBody += "<tr class='text-center " + (schedule.extra_payment && isPartPaymentEnabled ? "table-success" : "") + "' >";
         tableBody += "<td class='text-center'>" + schedule.emi_number + "</td>";
         tableBody += "<td class='text-center'>" + schedule.payment_date + "</td>";
-        tableBody += "<td class='text-right'> $ " + schedule.beginning_balance + "</td>";
-        tableBody += "<td class='text-right hide'> $ " + schedule.scheduled_payment + "</td>";
+        tableBody += "<td class='text-center'> $ " + schedule.beginning_balance + "</td>";
+        tableBody += "<td class='text-center hide'> $ " + schedule.scheduled_payment + "</td>";
         tableBody += "<td class='" + (isPartPaymentEnabled ? "" : "hide") + "'><input value='" + schedule.extra_payment + "' type='text' data-index='" + index + "' class='form-control form-control-sm extra_payments numeric' /></td>";
-        tableBody += "<td class='text-right'> $ " + schedule.total_payment + "</td>";
-        tableBody += "<td class='text-right'> $ " + schedule.principle + "</td>";
-        tableBody += "<td class='text-right'> $ " + schedule.interest + "</td>";
-        tableBody += "<td class='text-right'> $ " + schedule.ending_balance + "</td>";
+        tableBody += "<td class='text-center'> $ " + schedule.principle + "</td>";
+        tableBody += "<td class='text-center'> $ " + schedule.interest + "</td>";
+        tableBody += "<td class='text-center'> $ " + schedule.total_payment + "</td>";
+        tableBody += "<td class='text-center'> $ " + schedule.ending_balance + "</td>";
 
         tableBody += "</tr>";
       });
@@ -220,10 +246,10 @@ function calculateEmiAmount() {
       amortTable.style.display = "none";
     }
 
-    actNumberOfPaymentsField.value = amortSchedule.length;
-    totalEarlyPaymentsField.value = AMOUNT_FORMAT.format(totalEarlyPayments);
+    actNumberOfPaymentsField.innerHTML = amortSchedule.length;
+    totalEarlyPaymentsField.innerHTML = AMOUNT_FORMAT.format(totalEarlyPayments);
 
-    totalInterestField.value = AMOUNT_FORMAT.format(Math.round(totalInterest));
+    totalInterestField.innerHTML = AMOUNT_FORMAT.format(Math.round(totalInterest));
 
     renderChart(loanAmount, totalInterest);
 
@@ -232,57 +258,16 @@ function calculateEmiAmount() {
 }
 
 function renderChart(principle, interest) {
-  if (RENDRED_CHART_DATA.PRINCIPLE != principle || RENDRED_CHART_DATA.INTEREST != interest) {
-    RENDRED_CHART_DATA.PRINCIPLE = principle;
-    RENDRED_CHART_DATA.INTEREST = interest;
-  } else {
-    return;
-  }
-
-  document.querySelector("#chart-area").innerHTML = "";
-
-  var options = {
-    series: [Math.round(principle), Math.round(interest)],
-    colors: ["#ff6e54", "#dd5182"],
-    tooltip: {
-      fillSeriesColor: false,
-      y: {
-        formatter: function (val) {
-          return AMOUNT_FORMAT.format(val);
-        },
-      },
-    },
-    chart: {
-      type: "pie",
-      foreColor: "#373d3f",
-      dropShadow: {
-        enabled: true,
-      },
-    },
-    labels: ["Loan Principle", "Total Interest"],
-    dataLabels: {
-      enabled: true,
-    },
-    responsive: [
+  const data = {
+    labels: ["Principal Amount", "Total Interest"],
+    datasets: [
       {
-        breakpoint: 480,
-        options: {
-          chart: {
-            width: 200,
-          },
-          legend: {
-            position: "bottom",
-          },
-        },
+        data: [principle, interest],
+        backgroundColor: ["#ff6e54", "#dd5182"],
       },
     ],
-    legend: {
-      position: "bottom",
-      horizontalAlign: "center",
-    },
   };
 
-  var chart = new ApexCharts(document.querySelector("#chart-area"), options);
-  chart.render();
-  CHART_RENDERED = true;
+  pieChart.data = data;
+  pieChart.update();
 }

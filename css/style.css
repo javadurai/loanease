@@ -41,3 +41,7 @@ input[type="number"],
   flex-direction: column;
   justify-content: space-evenly;
 }
+
+#schedule {
+  width: 100%;
+}
