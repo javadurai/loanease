@@ -80,14 +80,14 @@ Welcome to the Loan Repayment Planner app! This user guide will provide you with
 
 Congratulations! You now have a comprehensive understanding of how to use the Loan Repayment Planner app. Start managing your loan repayment journey effectively and achieve your financial goals with ease.
 
-### EMI calculator fields - basic
+### Input Fields
 
 ![image](./img/fields.png)
 
-### EMI schedule
+### Payment Schedule
 
 ![image](./img/schedule.png)
 
-### EMI calculator fields - With part-payment
+### How it works with Part Payment options
 
 ![image](./img/part-payment.png)
