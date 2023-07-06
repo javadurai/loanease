@@ -25,7 +25,7 @@
 
 </head>
 
-<body>
+<body class="bg-secondary">
   <div class="container">
 
     <div class=" text-center">
@@ -39,7 +39,8 @@
             <h3 class="card-title"> Welcome to LoanEase</h3>
           </div>
           <div class="card-body">
-            <p class="card-text"><i class="fas fa-user"></i> Hello there, Savvy Planner!</p>
+            <p class="card-text"><i class="fas fa-user"></i> Hello there, <strong class="text-secondary">Savvy
+                Planner!</strong></p>
 
             <p class="card-text">Are you looking to master the art of loan repayment? You've just landed on the right
               page! <i class="fas fa-smile"></i></p>
@@ -169,14 +170,81 @@
     <hr>
 
     <section>
-      <p>Scheduled Monthly Payment: $<span id="emi_amount"></span> | Scheduled Number of Payments: <span
-          id="number_of_payments"></span> | Actual Number
-        of
-        Payments: <span id="actual_number_of_payments"></span> | Total
-        Early Payments: $<span id="total_early_payments"></span> | Total Interest: $<span id="total_interest"></span>
-      </p>
-
+      <div class="container text-center py-3">
+        <!-- <h2 class="mb-5">Loan Payment Details</h2> -->
+        <div class="row align-items-end">
+          <div class="col">
+            <div class="card border-primary">
+              <div class="card-header bg-primary text-white">
+                <h6 class="card-title"><i class="fas fa-wallet"></i> Your Monthly Payment</h6>
+              </div>
+              <div class="card-body">
+                <h4 class="card-subtitle mb-2 text-primary">$<span id="emi_amount"></span></h4>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border-secondary">
+              <div class="card-header bg-secondary text-white">
+                <h6 class="card-title"><i class="fas fa-list-ol"></i> Number of Payments</h6>
+              </div>
+              <div class="card-body">
+                <h4 class="card-subtitle mb-2 text-secondary"><span id="number_of_payments"></span></h4>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border-success">
+              <div class="card-header bg-success text-white">
+                <h6 class="card-title"><i class="fas fa-percent"></i> Total Interest You Pay</h6>
+              </div>
+              <div class="card-body">
+                <h4 class="card-subtitle mb-2 text-success">$<span id="total_interest"></span></h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
+
+    <section id="early_payments_section">
+      <div class="container text-center py-3">
+        <!-- <h2 class="mb-4">Loan Savings Summary</h2> -->
+        <div class="row align-items-end">
+          <div class="col">
+            <div class="card border-success">
+              <div class="card-header bg-success text-white">
+                <h6 class="card-title"><i class="fas fa-donate"></i> Total Early Payments</h6>
+              </div>
+              <div class="card-body">
+                <h4 class="card-subtitle mb-2 text-info">$<span id="total_early_payments"></span></h4>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border-info">
+              <div class="card-header bg-info text-white">
+                <h6 class="card-title"><i class="fas fa-check-circle"></i> Actual Number of Payments</h6>
+              </div>
+              <div class="card-body">
+                <h4 class="card-subtitle mb-2 text-success"><span id="actual_number_of_payments"></span></h4>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border-primary">
+              <div class="card-header bg-primary text-white">
+                <h6 class="card-title"><i class="fas fa-hand-holding-usd"></i> Money You Saved</h6>
+              </div>
+              <div class="card-body">
+                <h4 class="card-subtitle mb-2 text-primary">$<span id="money_saved"></span></h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <hr>
 
     <section>

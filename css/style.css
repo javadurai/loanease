@@ -2,9 +2,9 @@
   text-align: end;
 }
 
-body {
+/* body {
   background-color: #6c757d;
-}
+} */
 
 .container {
   background-color: #fff;
@@ -44,4 +44,8 @@ input[type="number"],
 
 #schedule {
   width: 100%;
+}
+
+.extra_payment_col {
+  width: 15%;
 }

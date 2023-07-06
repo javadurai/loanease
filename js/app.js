@@ -99,6 +99,8 @@ const actNumberOfPaymentsField = document.querySelector("#actual_number_of_payme
 const totalEarlyPaymentsField = document.querySelector("#total_early_payments");
 const totalInterestField = document.querySelector("#total_interest");
 
+const earlyPaymentsSection = document.querySelector("#early_payments_section");
+
 var amortSchedule = [];
 
 loanAmountField.addEventListener("change", (e) => calculateEmiAmount());
@@ -232,7 +234,7 @@ function calculateEmiAmount() {
         tableBody += "<td class='text-center'>" + schedule.payment_date + "</td>";
         tableBody += "<td class='text-center'> $ " + schedule.beginning_balance + "</td>";
         tableBody += "<td class='text-center hide'> $ " + schedule.scheduled_payment + "</td>";
-        tableBody += "<td class='" + (isPartPaymentEnabled ? "" : "hide") + "'><input value='" + schedule.extra_payment + "' type='text' data-index='" + index + "' class='form-control form-control-sm extra_payments numeric' /></td>";
+        tableBody += "<td class='extra_payment_col " + (isPartPaymentEnabled ? "" : "hide") + "'><input value='" + schedule.extra_payment + "' type='text' data-index='" + index + "' class='form-control form-control-sm extra_payments numeric' /></td>";
         tableBody += "<td class='text-center'> $ " + schedule.principle + "</td>";
         tableBody += "<td class='text-center'> $ " + schedule.interest + "</td>";
         tableBody += "<td class='text-center'> $ " + schedule.total_payment + "</td>";
@@ -252,6 +254,12 @@ function calculateEmiAmount() {
     totalInterestField.innerHTML = AMOUNT_FORMAT.format(Math.round(totalInterest));
 
     renderChart(loanAmount, totalInterest);
+
+    if (nom == amortSchedule.length) {
+      earlyPaymentsSection.style.display = "none";
+    } else {
+      earlyPaymentsSection.style.display = "revert";
+    }
 
     document.querySelectorAll(".extra_payments").forEach((e) => e.addEventListener("change", (e) => calculateEmiAmount()));
   }
