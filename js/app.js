@@ -17,8 +17,26 @@ const options = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
+    datalabels: {
+      formatter: (value, ctx) => {
+        let sum = 0;
+        let dataArr = ctx.chart.data.datasets[0].data;
+        dataArr.map((data) => {
+          sum += data;
+        });
+        let percentage = ((value * 100) / sum).toFixed(2) + "%";
+        return percentage;
+      },
+      color: "#fff",
+      font: {
+        weight: "bold",
+      },
+    },
     legend: {
       position: "bottom",
+      labels: {
+        pointStyle: "circle",
+      },
     },
   },
 };
@@ -27,6 +45,7 @@ const pieChart = new Chart(document.getElementById("chart-area"), {
   type: "pie",
   data: data,
   options: options,
+  plugins: [ChartDataLabels],
 });
 
 const month = new Array();
@@ -98,8 +117,10 @@ const numberOfPaymentsField = document.querySelector("#number_of_payments");
 const actNumberOfPaymentsField = document.querySelector("#actual_number_of_payments");
 const totalEarlyPaymentsField = document.querySelector("#total_early_payments");
 const totalInterestField = document.querySelector("#total_interest");
+const whatYouSavedField = document.querySelector("#money_saved");
 
 const earlyPaymentsSection = document.querySelector("#early_payments_section");
+const totalPaymentHeader = document.querySelector("#total_payment_hdr");
 
 var amortSchedule = [];
 
@@ -133,6 +154,7 @@ function calculateEmiAmount() {
     partPayment = partPaymentsField.value;
     isPartPaymentEnabled = partPayment != "off";
     document.getElementById("part_payment_hdr").style.display = isPartPaymentEnabled ? "revert" : "none";
+    totalPaymentHeader.innerHTML = isPartPaymentEnabled ? "(A + B + C)" : "(A + B)";
 
     document.querySelectorAll(".scheduled_payment_section").forEach((item) => {
       item.style.display = partPayment == "scheduled_plan" ? null : "none";
@@ -151,6 +173,8 @@ function calculateEmiAmount() {
     rateVariable = Math.pow(1 + roi, nom);
 
     const emi = Math.round(loanAmount * roi * (rateVariable / (rateVariable - 1)));
+
+    const originalFullPayment = emi * nom;
 
     // Preserving extra payments added before a change
     if (partPayment == "scheduled_plan") {
@@ -194,12 +218,19 @@ function calculateEmiAmount() {
       totalInterest += beginningBalance * roi;
       extraPaymentForThisInstallment = extraPaymentScheule.get(i) != null ? extraPaymentScheule.get(i) : 0;
 
+      // console.log(i);
+      // console.log(emiForThisInstallment);
+
       if (emiForThisInstallment + extraPaymentForThisInstallment > beginningBalance - interest) {
         extraPaymentForThisInstallment = beginningBalance - (emiForThisInstallment - interest);
       }
 
+      // console.log(extraPaymentForThisInstallment);
+
       totalPayment = emiForThisInstallment + (isPartPaymentEnabled ? extraPaymentForThisInstallment : 0);
       totalEarlyPayments += isPartPaymentEnabled ? extraPaymentForThisInstallment : 0;
+
+      const endBalance = beginningBalance - (totalPayment < emi ? totalPayment : emiForThisInstallment - interest + (isPartPaymentEnabled ? extraPaymentForThisInstallment : 0));
       amortSchedule.push({
         emi_number: i,
         payment_date: emiDate.toLocaleDateString("en-US", {
@@ -212,7 +243,8 @@ function calculateEmiAmount() {
         principle: AMOUNT_FORMAT.format(Math.round(emiForThisInstallment - interest)),
         interest: AMOUNT_FORMAT.format(Math.round(interest)),
         extra_payment: extraPaymentScheule.get(i) != null ? AMOUNT_FORMAT.format(Math.round(extraPaymentForThisInstallment)) : "",
-        ending_balance: AMOUNT_FORMAT.format(Math.round(beginningBalance - (totalPayment < emi ? totalPayment : emiForThisInstallment - interest + (isPartPaymentEnabled ? extraPaymentForThisInstallment : 0)))),
+        ending_balance: AMOUNT_FORMAT.format(Math.round(endBalance)),
+        loan_paid_percentage: ((endBalance * 100) / loanAmount).toFixed(2),
       });
 
       if (beginningBalance < emi) {
@@ -234,11 +266,12 @@ function calculateEmiAmount() {
         tableBody += "<td class='text-center'>" + schedule.payment_date + "</td>";
         tableBody += "<td class='text-center'> $ " + schedule.beginning_balance + "</td>";
         tableBody += "<td class='text-center hide'> $ " + schedule.scheduled_payment + "</td>";
-        tableBody += "<td class='extra_payment_col " + (isPartPaymentEnabled ? "" : "hide") + "'><input value='" + schedule.extra_payment + "' type='text' data-index='" + index + "' class='form-control form-control-sm extra_payments numeric' /></td>";
         tableBody += "<td class='text-center'> $ " + schedule.principle + "</td>";
         tableBody += "<td class='text-center'> $ " + schedule.interest + "</td>";
+        tableBody += "<td class='extra_payment_col " + (isPartPaymentEnabled ? "" : "hide") + "'><input value='" + schedule.extra_payment + "' type='text' data-index='" + index + "' class='form-control form-control-sm extra_payments numeric' /></td>";
         tableBody += "<td class='text-center'> $ " + schedule.total_payment + "</td>";
         tableBody += "<td class='text-center'> $ " + schedule.ending_balance + "</td>";
+        tableBody += "<td class='text-center'> " + schedule.loan_paid_percentage + " %</td>";
 
         tableBody += "</tr>";
       });
@@ -260,6 +293,10 @@ function calculateEmiAmount() {
     } else {
       earlyPaymentsSection.style.display = "revert";
     }
+
+    const whatYouSaved = originalFullPayment - loanAmount - totalInterest;
+
+    whatYouSavedField.innerHTML = AMOUNT_FORMAT.format(whatYouSaved);
 
     document.querySelectorAll(".extra_payments").forEach((e) => e.addEventListener("change", (e) => calculateEmiAmount()));
   }

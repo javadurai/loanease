@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="./css/bootstrap-datepicker.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <link rel="stylesheet" href="./css/style.css" />
 
 </head>
@@ -257,12 +258,13 @@
               <th class="text-center align-middle">Month</th>
               <th class="text-center align-middle">Opening <br>Balance</th>
               <th class="text-center hide align-middle">Scheduled Payment</th>
-              <th class="text-center align-middle" id="part_payment_hdr">Part Payment</th>
               <th class="text-center align-middle bg-success text-light">Principal<br> <span class="">(A)</span></th>
               <th class="text-center align-middle bg-danger text-light">Interest <br> <span class="">(B)</span></th>
-              <th class="text-center align-middle bg-secondary text-light">Total Payment<br> <span class="">(A +
-                  B)</span></th>
+              <th class="text-center align-middle bg-info text-light" id="part_payment_hdr">Part Payment <br> (C)</th>
+              <th class="text-center align-middle bg-secondary text-light">Total Payment<br> <span
+                  id="total_payment_hdr">(A + B)</span></th>
               <th class="text-center align-middle">Closing <br>Balance</th>
+              <th class="text-center align-middle">Loan Paid <br>Till Date</th>
             </tr>
           </thead>
 
