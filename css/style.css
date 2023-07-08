@@ -49,3 +49,7 @@ input[type="number"],
 .extra_payment_col {
   width: 15%;
 }
+
+.app-title {
+  font-family: "Orbitron", sans-serif;
+}
