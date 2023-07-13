@@ -19,7 +19,7 @@ Take charge of your loan repayment today with our user-friendly and feature-rich
 - Planning ad-hoc part payments
 - Helps calculating the impact after part-payments
 
-Live Site: https://javadurai.github.io/loan-amotization-calculator/
+Live Site: https://javadurai.github.io/loanease/
 
 ### User Guide
 
