@@ -121,98 +121,106 @@ function isFieldNotEmpty(field) {
   return Boolean(field.value);
 }
 
-function calculateEmiAmount() {
-  const partPaymentsField = document.querySelector("input[name='part_payments']:checked");
-  const partPaymentFrequency = document.querySelector("input[name='schedule_frequecy']:checked").value;
+// Function to format the input values
+const formatInputValue = (inputValue) => {
+  return Number(inputValue.replace(/,/g, ""));
+};
+
+// Function to calculate the monthly payment
+const calculateMonthlyPayment = (loanAmount, interestRate, totalPayments) => {
+  const rateVariable = Math.pow(1 + interestRate, totalPayments);
+  return Math.round(loanAmount * interestRate * (rateVariable / (rateVariable - 1)));
+};
+
+// Function to populate extra payment schedule
+const populateExtraPaymentSchedule = (partPayment, partPayInstallment, totalPayments, partPaymentFrequency, extraPaymentsList) => {
   const extraPaymentSchedule = new Map();
+  const frequencyFactor = partPaymentFrequency == "monthly" ? 1 : partPaymentFrequency == "quarterly" ? 4 : 12;
 
-  if (!areRequiredFieldsNotEmpty([loanAmountField, interestRateField, loanPeriodField, loanStartDateField])) {
-    return;
-  }
-
-  // Gets values from fields
-  let loanAmount = eval(loanAmountField.value.replace(/,/g, ""));
-  let interestRate = interestRateField.value;
-  let loanPeriod = loanPeriodField.value;
-  let loanStartDate = loanStartDateField.value;
-  let partPayment = partPaymentsField.value;
-  let isPartPaymentEnabled = partPayment != "off";
-
-  document.getElementById("part_payment_hdr").style.display = isPartPaymentEnabled ? "revert" : "none";
-  totalPaymentHeader.innerHTML = isPartPaymentEnabled ? "(A + B + C)" : "(A + B)";
-
-  document.querySelectorAll(".scheduled_payment_section").forEach((item) => {
-    item.style.display = partPayment == "scheduled_plan" ? null : "none";
-  });
-
-  let partPayInstallment = eval(partPayInstallmentField.value.replace(/,/g, ""));
-
-  if (partPayInstallment != undefined) {
-    partPayInstallmentField.value = AMOUNT_FORMAT.format(partPayInstallment);
-  }
-
-  // Calculating EMI
-  interestRate = interestRate / 12 / 100;
-  totalPayments = 12 * loanPeriod;
-
-  let rateVariable = Math.pow(1 + interestRate, totalPayments);
-
-  const monthlyPayment = Math.round(loanAmount * interestRate * (rateVariable / (rateVariable - 1)));
-
-  const originalFullPayment = monthlyPayment * totalPayments;
-
-  // Preserving extra payments added before a change
   if (partPayment == "scheduled_plan") {
-    let frequencyFactor = partPaymentFrequency == "monthly" ? 1 : partPaymentFrequency == "quarterly" ? 4 : 12;
-    if (partPayInstallment != "" && partPayInstallment > 0) {
-      for (let index = 0; index < totalPayments; index++) {
-        extraPaymentSchedule.set(index + 1, index % frequencyFactor == 0 ? partPayInstallment : null);
-      }
+    for (let index = 0; index < totalPayments; index++) {
+      extraPaymentSchedule.set(index + 1, index % frequencyFactor == 0 ? partPayInstallment : null);
     }
   } else {
-    const extraPaymentsList = document.querySelectorAll(".extra_payments");
-
     extraPaymentsList.forEach((payment) => {
       if (isFieldNotEmpty(payment)) {
-        extraPaymentSchedule.set(eval(payment.getAttribute("data-index")) + 1, eval(payment.value.replace(/,/g, "")));
+        extraPaymentSchedule.set(Number(payment.getAttribute("data-index")) + 1, formatInputValue(payment.value));
       }
     });
   }
 
-  const dateParts = loanStartDate.split("-");
-  let nextPaymentDate = new Date(dateParts[1], MONTHS.indexOf(dateParts[0]), 1);
+  return extraPaymentSchedule;
+};
 
-  let { schedule, totalInterestPaid, totalExtraPayments } = calculateAmortizationSchedule(totalPayments, monthlyPayment, nextPaymentDate, interestRate, extraPaymentSchedule, isPartPaymentEnabled, loanAmount);
-
-  populateAmortTable(schedule, isPartPaymentEnabled, amortTable, amortTableBody);
-
-  renderPieChart(loanAmount, totalInterestPaid);
-
-  if (totalPayments == schedule.length) {
-    earlyPaymentsSection.style.display = "none";
-  } else {
-    earlyPaymentsSection.style.display = "revert";
+// Main function to calculate EMI amount
+function calculateEmiAmount() {
+  // Validate input fields
+  if (!areRequiredFieldsNotEmpty([loanAmountField, interestRateField, loanPeriodField, loanStartDateField])) {
+    return;
   }
 
+  const loanAmount = formatInputValue(loanAmountField.value);
+  let interestRate = interestRateField.value;
+  const loanPeriod = loanPeriodField.value;
+  const loanStartDate = loanStartDateField.value;
+  const partPaymentsField = document.querySelector("input[name='part_payments']:checked");
+  const partPayment = partPaymentsField.value;
+  const isPartPaymentEnabled = partPayment != "off";
+  const partPaymentFrequency = document.querySelector("input[name='schedule_frequecy']:checked").value;
+  let partPayInstallment = formatInputValue(partPayInstallmentField.value);
+
+  // Update UI based on part payment
+  updateUIBasedOnPartPayment(isPartPaymentEnabled, partPayment);
+
+  // Calculate EMI
+  interestRate = interestRate / 12 / 100;
+  const totalPayments = 12 * loanPeriod;
+  const monthlyPayment = calculateMonthlyPayment(loanAmount, interestRate, totalPayments);
+  const originalFullPayment = monthlyPayment * totalPayments;
+
+  // Prepare the extra payment schedule
+  const extraPaymentSchedule = populateExtraPaymentSchedule(partPayment, partPayInstallment, totalPayments, partPaymentFrequency, document.querySelectorAll(".extra_payments"));
+
+  // Prepare amortization schedule
+  const dateParts = loanStartDate.split("-");
+  const nextPaymentDate = new Date(dateParts[1], MONTHS.indexOf(dateParts[0]), 1);
+  const { schedule, totalInterestPaid, totalExtraPayments } = calculateAmortizationSchedule(totalPayments, monthlyPayment, nextPaymentDate, interestRate, extraPaymentSchedule, isPartPaymentEnabled, loanAmount);
+
+  // Update table and chart
+  populateAmortTable(schedule, isPartPaymentEnabled, amortTable, amortTableBody);
+  renderPieChart(loanAmount, totalInterestPaid);
+
+  // Show or hide the early payments section based on the schedule
+  earlyPaymentsSection.style.display = totalPayments == schedule.length ? "none" : "revert";
+
+  // Calculate savings
   const whatYouSaved = originalFullPayment - loanAmount - totalInterestPaid;
 
-  // Write EMI field
+  // Update fields with calculated values
   writeFields(monthlyPayment, loanAmount, totalPayments, schedule, totalExtraPayments, totalInterestPaid, whatYouSaved);
 
-  const extraPayments = document.querySelectorAll(".extra_payments");
-
-  extraPayments.forEach((element) => {
+  // Add event listener to extra payment fields
+  document.querySelectorAll(".extra_payments").forEach((element) => {
     element.addEventListener("change", calculateEmiAmount);
   });
 }
 
+// Function to update the UI based on part payment
+const updateUIBasedOnPartPayment = (isPartPaymentEnabled, partPayment) => {
+  const partPaymentHeader = document.getElementById("part_payment_hdr");
+  const totalPaymentHeader = document.getElementById("total_payment_hdr"); // Please replace with actual ID
+  const scheduledPaymentSection = document.querySelectorAll(".scheduled_payment_section");
+
+  partPaymentHeader.style.display = isPartPaymentEnabled ? "revert" : "none";
+  totalPaymentHeader.innerHTML = isPartPaymentEnabled ? "(A + B + C)" : "(A + B)";
+
+  scheduledPaymentSection.forEach((item) => {
+    item.style.display = partPayment == "scheduled_plan" ? null : "none";
+  });
+};
+
 /**
  * The function populateAmortTable populates the amortization table based on the provided schedule.
- *
- * @param {array} schedule - The amortization schedule.
- * @param {boolean} isPartPaymentEnabled - Flag to indicate whether part payment is enabled.
- * @param {object} amortTable - The amortization table element.
- * @param {object} amortTableBody - The body of the amortization table.
  */
 function populateAmortTable(schedule, isPartPaymentEnabled, amortTable, amortTableBody) {
   if (schedule.length > 0) {
@@ -263,6 +271,7 @@ function calculateAmortizationSchedule(totalPayments, monthlyPayment, nextPaymen
     totalExtraPayments += isPartPaymentEnabled ? extraPaymentThisMonth : 0;
 
     const endingBalance = currentBalance - (totalPaymentThisMonth < monthlyPayment ? totalPaymentThisMonth : currentPaymentAmount - interestForThisMonth + (isPartPaymentEnabled ? extraPaymentThisMonth : 0));
+
     let formattedEndingBalance = AMOUNT_FORMAT.format(Math.round(endingBalance));
 
     schedule.push({
@@ -293,14 +302,6 @@ function calculateAmortizationSchedule(totalPayments, monthlyPayment, nextPaymen
 /**
  * The function writeFields takes several numeric values, formats them, and then writes these values
  * into their corresponding fields in the HTML.
- *
- * @param {number} monthlyPayment - The monthly payment amount.
- * @param {number} loanAmount - The total loan amount.
- * @param {number} totalPayments - The number of payments.
- * @param {array} schedule - The amortization schedule.
- * @param {number} totalExtraPayments - The total early payments.
- * @param {number} totalInterestPaid - The total interest.
- * @param {number} whatYouSaved - The amount saved.
  */
 function writeFields(monthlyPayment, loanAmount, totalPayments, schedule, totalExtraPayments, totalInterestPaid, whatYouSaved) {
   monthlyPaymentAmountField.innerHTML = AMOUNT_FORMAT.format(monthlyPayment);
