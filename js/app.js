@@ -91,7 +91,7 @@ $(".monthpicker")
   })
   .on("change", calculateEmiAmount);
 
-if (isFieldNotEmpty(loanStartDateField)) {
+if (!isFieldNotEmpty(loanStartDateField)) {
   const currentDate = new Date()
     .toLocaleDateString("en-US", {
       year: "numeric",
