@@ -10,17 +10,17 @@ const interestRateField = document.querySelector("#interest_rate");
 const loanPeriodField = document.querySelector("#loan_period");
 const loanStartDateField = document.querySelector("#loan_start_date");
 const partPayInstallmentField = document.querySelector("#part_payment_installment");
-const monthlyPaymentAmountField = document.querySelector("#emi_amount");
-const numberOfPaymentsField = document.querySelector("#number_of_payments");
-const actNumberOfPaymentsField = document.querySelector("#actual_number_of_payments");
-const totalExtraPaymentsField = document.querySelector("#total_early_payments");
-const totalInterestField = document.querySelector("#total_interest");
-const whatYouSavedField = document.querySelector("#money_saved");
+const monthlyPaymentAmountField = document.querySelector("#monthly_installment");
+const numberOfPaymentsField = document.querySelector("#total_installments");
+const actNumberOfPaymentsField = document.querySelector("#actual_installments_made");
+const totalExtraPaymentsField = document.querySelector("#total_prepayments_made");
+const totalInterestField = document.querySelector("#total_interest_payable");
+const whatYouSavedField = document.querySelector("#total_savings");
 const earlyPaymentsSection = document.querySelector("#early_payments_section");
 const totalPaymentHeader = document.querySelector("#total_payment_hdr");
 
 // Table selectors
-const amortTable = document.querySelector("#amort_table");
+const amortTable = document.querySelector("#amortization_table");
 const amortTableBody = amortTable.querySelector("tbody");
 
 // Define pie chart colors and labels as constants
@@ -154,6 +154,7 @@ const populateExtraPaymentSchedule = (partPayment, partPayInstallment, totalPaym
 
 // Main function to calculate EMI amount
 function calculateEmiAmount() {
+  console.log("test");
   // Validate input fields
   if (!areRequiredFieldsNotEmpty([loanAmountField, interestRateField, loanPeriodField, loanStartDateField])) {
     return;
@@ -210,13 +211,20 @@ const updateUIBasedOnPartPayment = (isPartPaymentEnabled, partPayment) => {
   const partPaymentHeader = document.getElementById("part_payment_hdr");
   const totalPaymentHeader = document.getElementById("total_payment_hdr"); // Please replace with actual ID
   const scheduledPaymentSection = document.querySelectorAll(".scheduled_payment_section");
+  const frequencySelector = document.querySelectorAll("#frequency_selector input");
 
   partPaymentHeader.style.display = isPartPaymentEnabled ? "revert" : "none";
   totalPaymentHeader.innerHTML = isPartPaymentEnabled ? "(A + B + C)" : "(A + B)";
 
-  scheduledPaymentSection.forEach((item) => {
-    item.style.display = partPayment == "scheduled_plan" ? null : "none";
+  // scheduledPaymentSection.forEach((item) => {
+  //   item.style.display = partPayment == "scheduled_plan" ? null : "none";
+  // });
+
+  frequencySelector.forEach((item) => {
+    item.disabled = partPayment == "off";
   });
+
+  partPayInstallmentField.disabled = partPayment == "off";
 };
 
 /**
