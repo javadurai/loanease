@@ -86,7 +86,7 @@
     <hr>
     <main>
       <div class="main-flex">
-        <div class="main-data-picker">
+        <div class="main-data-picker mr-2 border-end">
 
           <table class="table-sm table-borderless" style="margin: auto;">
             <tbody>
@@ -116,6 +116,7 @@
                     <input id="interest_rate" type="text" class="form-control form-control-sm numeric"
                       data-bs-toggle="popover" data-bs-title="Annual Interest Rate"
                       data-bs-content="Enter the annual interest rate for the loan. For example, 11 for 11%." />
+                    <input type="range" class="form-range" min="0" max="25" step="0.1" id="customRange3">
                   </div>
                 </td>
                 </td>
@@ -169,6 +170,19 @@
               </tr>
               <tr class="scheduled_payment_section">
                 <td class="align-middle">
+                  <label class="active" for="part_payment_installment">Part Payment Per Installment</label>
+                </td>
+                <td>
+                  <div class="input-group">
+                    <div class="input-group-text">
+                      $
+                    </div>
+                    <input id="part_payment_installment" type="text" class="form-control form-control-sm numeric" />
+                  </div>
+                </td>
+              </tr>
+              <tr class="scheduled_payment_section">
+                <td class="align-middle">
                   <label class="active" for="total_interest">Schedule Frequency</label>
                 </td>
                 <td>
@@ -186,31 +200,128 @@
                   </div>
                 </td>
               </tr>
-              <tr class="scheduled_payment_section">
-                <td class="align-middle">
-                  <label class="active" for="part_payment_installment">Part Payment Per Installment</label>
-                </td>
-                <td>
-                  <div class="input-group">
-                    <div class="input-group-text">
-                      $
-                    </div>
-                    <input id="part_payment_installment" type="text" class="form-control form-control-sm numeric" />
-                  </div>
-                </td>
-              </tr>
             </tbody>
           </table>
         </div>
-        <div class="main-chart">
-          <div id="chart-container">
-            <canvas id="chart-area" />
+        <div class="m-3">
+          <div class="m-1">
+            <table class="table table-bordered text-center">
+              <tbody>
+                <tr>
+                  <td class="text-secondary">
+                    <h6 class="card-title m-2"><i class="fas fa-wallet"></i> Monthly Installment</h6>
+                    <h4 class="card-subtitle mb-2">$<span id="monthly_installment"></span></h4>
+                  </td class="text-secondary">
+                  <td class="text-secondary">
+                    <h6 class="card-title m-2"><i class="fas fa-percent"></i> Interest Payable</h6>
+                    <h4 class="card-subtitle mb-2">$<span id="total_interest_payable"></span></h4>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-secondary">
+                    <h6 class="card-title m-2"><i class="fas fa-list-ol"></i> Total Installments</h6>
+                    <h4 class="card-subtitle mb-2"><span id="total_installments"></span></h4>
+                  </td>
+                  <td class="text-secondary">
+                    <h6 class="card-title m-2"><i class="fas fa-check-circle"></i> Actual Installments</h6>
+                    <h4 class="card-subtitle mb-2"> <span id="actual_installments_made"></span></h4>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-secondary">
+                    <h6 class="card-title m-2"><i class="fas fa-donate"></i> Total Prepayments</h6>
+                    <h4 class="card-subtitle mb-2">$<span id="total_prepayments_made"></span></h4>
+                  </td>
+                  <td class="text-secondary">
+                    <h6 class="card-title m-2"><i class="fas fa-hand-holding-usd"></i> Total Savings</h6>
+                    <h4 class="card-subtitle mb-2">$<span id="total_savings"></span></h4>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+          <!-- <div class="row align-items-end text-center">
+            <div class="col">
+              <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                  <h6 class="card-title m-2"><i class="fas fa-wallet"></i> Monthly Installment</h6>
+                </div>
+                <div class="card-body">
+                  <h4 class="card-subtitle mb-2 text-secondary">$<span id="monthly_installment"></span></h4>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                  <h6 class="card-title m-2"><i class="fas fa-list-ol"></i> Total Installments</h6>
+                </div>
+                <div class="card-body">
+                  <h4 class="card-subtitle mb-2 text-secondary"><span id="total_installments"></span></h4>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                  <h6 class="card-title m-2"><i class="fas fa-percent"></i> Interest Payable</h6>
+                </div>
+                <div class="card-body">
+                  <h4 class="card-subtitle mb-2 text-secondary">$<span id="total_interest_payable"></span></h4>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row align-items-end text-center mt-3" id="early_payments_section">
+            <div class="col">
+              <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                  <h6 class="card-title m-2"><i class="fas fa-donate"></i> Total Prepayments</h6>
+                </div>
+                <div class="card-body">
+                  <h4 class="card-subtitle mb-2 text-secondary">$<span id="total_prepayments_made"></span></h4>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                  <h6 class="card-title m-2"><i class="fas fa-check-circle"></i> Actual Installments</h6>
+                </div>
+                <div class="card-body">
+                  <h4 class="card-subtitle mb-2 text-secondary"> <span id="actual_installments_made"></span></h4>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                  <h6 class="card-title m-2"><i class="fas fa-hand-holding-usd"></i> Total <br>Savings</h6>
+                </div>
+                <div class="card-body">
+                  <h4 class="card-subtitle mb-2 text-secondary">$<span id="total_savings"></span></h4>
+                </div>
+              </div>
+            </div>
+          </div> -->
         </div>
       </div>
     </main>
     <hr>
 
+    <section>
+      <div class="chart-container ml-5 mr-5 bg-light">
+        <div id="bar-chart-container" class="border">
+          <canvas id="bar-chart-area" />
+        </div>
+        <div id="pie-chart-container" class="border">
+          <canvas id="pie-chart-area" />
+        </div>
+      </div>
+    </section>
+
+    <!-- <hr>
     <section>
       <div class="container text-center py-3">
         <div class="row align-items-end">
@@ -246,9 +357,9 @@
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
 
-    <section id="early_payments_section">
+    <!-- <section id="early_payments_section">
       <div class="container text-center py-3">
         <div class="row align-items-end">
           <div class="col">
@@ -283,7 +394,7 @@
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <hr>
 

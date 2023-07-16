@@ -46,6 +46,7 @@ const defaultValues = {
 // Define pie chart colors and labels as constants
 const CHART_COLORS = ["#28a745", "#dd5182"];
 const CHART_LABELS = ["Principal Amount", "Total Interest"];
+let BAR_CHART_DATA = [];
 
 // Function to generate chart data
 const generatePieChartData = (data = [0, 0]) => {
@@ -55,6 +56,78 @@ const generatePieChartData = (data = [0, 0]) => {
       {
         data,
         backgroundColor: CHART_COLORS,
+      },
+    ],
+  };
+};
+
+const generateBarChartData = (data = []) => {
+  // Group data by year and calculate the sum of principle, interest, and ending_balance for each year
+  let groupedData = data.reduce((acc, cur) => {
+    let year = cur.payment_date.split(" ")[1];
+    if (!acc[year]) {
+      acc[year] = {
+        principle: 0,
+        interest: 0,
+        ending_balance: Infinity, // set initial ending_balance to Infinity
+        loan_paid_percentage: 0,
+      };
+    }
+    acc[year].principle += parseInt(cur.principle.replace(",", ""));
+    acc[year].interest += parseInt(cur.interest);
+    let currentBalance = parseInt(cur.ending_balance.replace(",", ""));
+    acc[year].ending_balance = Math.min(acc[year].ending_balance, currentBalance); // update only if current balance is lower
+    acc[year].loan_paid_percentage = parseFloat(cur.loan_paid_percentage);
+    return acc;
+  }, {});
+
+  BAR_CHART_DATA = groupedData;
+
+  // Extract labels/dates
+  let labels = Object.keys(groupedData);
+
+  // Extract principle dataset
+  let principle = Object.values(groupedData).map((item) => item.principle);
+
+  // Extract interest dataset
+  let interest = Object.values(groupedData).map((item) => item.interest);
+
+  // Extract ending balance dataset
+  let ending_balance = Object.values(groupedData).map((item) => item.ending_balance);
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        order: 2,
+        label: "Principle",
+        yAxisID: "bar-y-axis", // specify the y-axis for the bar chart
+        data: principle,
+        backgroundColor: "rgb(25, 135, 84)",
+        stack: "combined",
+        type: "bar",
+        pointStyle: "rect",
+      },
+      {
+        order: 3,
+        label: "Interest",
+        yAxisID: "bar-y-axis", // specify the y-axis for the bar chart
+        data: interest,
+        backgroundColor: "rgb(220, 53, 69)",
+        stack: "combined",
+        type: "bar",
+        pointStyle: "triangle",
+      },
+      {
+        order: 1,
+        label: "Balance",
+        yAxisID: "line-y-axis", // specify the y-axis for the line chart
+        data: ending_balance,
+        borderColor: "rgb(108, 117, 125)",
+        backgroundColor: "white",
+        stack: "combined",
+        type: "line",
+        // pointStyle: "line",
       },
     ],
   };
@@ -81,25 +154,136 @@ const generatePieChartOptions = () => {
       legend: {
         position: "bottom",
         labels: {
-          pointStyle: "circle",
+          usePointStyle: true,
+          pointStyle: (context) => {
+            return "circle";
+          },
         },
+      },
+      title: {
+        display: true,
+        text: "Break-up of Total Payment",
+      },
+    },
+  };
+};
+
+// Function to generate chart options
+const AMOUNT_LABELS = {
+  Principle: "Principle",
+  Interest: "Interest",
+  Balance: "Balance",
+};
+
+const TOOLTIP_STYLE = {
+  borderColor: "rgb(0, 0, 255)",
+  backgroundColor: "rgb(255, 0, 0)",
+  borderWidth: 2,
+  borderDash: [2, 2],
+  borderRadius: 2,
+};
+
+const createLabelStrings = (label, key, axisData) => {
+  if (label === AMOUNT_LABELS.Balance) {
+    return [`Year: ${key}`, `Balance: $${AMOUNT_FORMAT.format(axisData.ending_balance)}`, `Cumulative Repayment: ${(100 - axisData.loan_paid_percentage).toFixed(2)}%`];
+  }
+
+  return [`Year: ${key}`, `${label}: $${AMOUNT_FORMAT.format(axisData[label.toLowerCase()])}`, `Total Payment: $${AMOUNT_FORMAT.format(axisData.principle + axisData.interest)}`];
+};
+
+const generateBarChartOptions = () => {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      datalabels: {
+        color: "#fff",
+        font: { weight: "bold" },
+        display: false,
+      },
+      legend: {
+        position: "bottom",
+        labels: {
+          usePointStyle: true,
+        },
+      },
+      tooltip: {
+        usePointStyle: false,
+        displayColors: false,
+        callbacks: {
+          labelColor: (context) => TOOLTIP_STYLE,
+          labelTextColor: (context) => "#fff",
+          title: (context) => "",
+          label: (context) => {
+            const label = context.dataset.label || "";
+            const key = context.label;
+            const axisData = BAR_CHART_DATA[key];
+            return createLabelStrings(label, key, axisData);
+          },
+        },
+      },
+      title: {
+        display: true,
+        text: "Payment Per Year",
+      },
+    },
+    scales: {
+      "bar-y-axis": {
+        position: "right",
+        beginAtZero: false,
+        title: {
+          display: true,
+          text: "Principle and Interest",
+        },
+        grid: { display: false },
+      },
+      "line-y-axis": {
+        position: "left",
+        beginAtZero: false,
+        title: {
+          display: true,
+          text: "Balance",
+        },
+        grid: { display: false },
       },
     },
   };
 };
 
 // Initialize the chart
-const pieChart = new Chart(document.getElementById("chart-area"), {
+const pieChart = new Chart(document.getElementById("pie-chart-area"), {
   type: "pie",
   data: generatePieChartData(),
   options: generatePieChartOptions(),
   plugins: [ChartDataLabels],
 });
 
+const barChart = new Chart(document.getElementById("bar-chart-area"), {
+  type: "bar",
+  data: generateBarChartData(),
+  options: generateBarChartOptions(),
+  plugins: [ChartDataLabels],
+});
+
+console.log(barChart);
+
 // Function to update and render the chart
-const renderPieChart = (principle, interest) => {
+const renderChart = (principle, interest, schedule) => {
   pieChart.data.datasets[0].data = [principle, interest];
   pieChart.update();
+
+  let barChartData = generateBarChartData(schedule);
+
+  // Update the labels of the chart
+  barChart.data.labels = barChartData.labels;
+
+  // Update each dataset in the chart
+  barChartData.datasets.forEach((dataset, i) => {
+    barChart.data.datasets[i].data = dataset.data;
+  });
+
+  // Update the chart to reflect the new data
+  barChart.update();
 };
 
 // month picker
@@ -199,10 +383,11 @@ function calculateEmiAmount() {
 
   // Update table and chart
   populateAmortTable(schedule, isPartPaymentEnabled, amortTable, amortTableBody);
-  renderPieChart(loanAmount, totalInterestPaid);
+
+  renderChart(loanAmount, totalInterestPaid, schedule);
 
   // Show or hide the early payments section based on the schedule
-  earlyPaymentsSection.style.display = totalPayments == schedule.length ? "none" : "revert";
+  // earlyPaymentsSection.style.display = totalPayments == schedule.length ? "none" : "revert";
 
   // Calculate savings
   const whatYouSaved = originalFullPayment - loanAmount - totalInterestPaid;
