@@ -23,6 +23,26 @@ const totalPaymentHeader = document.querySelector("#total_payment_hdr");
 const amortTable = document.querySelector("#amortization_table");
 const amortTableBody = amortTable.querySelector("tbody");
 
+// const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+// const popoverList = [...popoverTriggerList].map((popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl));
+
+const currentDate = new Date()
+  .toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+  })
+  .split(" ")
+  .join("-");
+
+const defaultValues = {
+  loanAmount: "50,000",
+  interestRate: "5.8",
+  loanPeriod: "4",
+  loanStartDate: currentDate,
+  partPayInstallment: "",
+  partPayment: "off",
+};
+
 // Define pie chart colors and labels as constants
 const CHART_COLORS = ["#28a745", "#dd5182"];
 const CHART_LABELS = ["Principal Amount", "Total Interest"];
@@ -91,18 +111,6 @@ $(".monthpicker")
   })
   .on("change", calculateEmiAmount);
 
-if (!isFieldNotEmpty(loanStartDateField)) {
-  const currentDate = new Date()
-    .toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-    })
-    .split(" ")
-    .join("-");
-
-  loanStartDateField.value = currentDate;
-}
-
 // Set up event listeners
 loanAmountField.addEventListener("change", calculateEmiAmount);
 interestRateField.addEventListener("change", calculateEmiAmount);
@@ -154,7 +162,6 @@ const populateExtraPaymentSchedule = (partPayment, partPayInstallment, totalPaym
 
 // Main function to calculate EMI amount
 function calculateEmiAmount() {
-  console.log("test");
   // Validate input fields
   if (!areRequiredFieldsNotEmpty([loanAmountField, interestRateField, loanPeriodField, loanStartDateField])) {
     return;
@@ -169,6 +176,9 @@ function calculateEmiAmount() {
   const isPartPaymentEnabled = partPayment != "off";
   const partPaymentFrequency = document.querySelector("input[name='schedule_frequecy']:checked").value;
   let partPayInstallment = formatInputValue(partPayInstallmentField.value);
+
+  // Check the default values on page load
+  checkDefaultValues();
 
   // Update UI based on part payment
   updateUIBasedOnPartPayment(isPartPaymentEnabled, partPayment);
@@ -208,23 +218,27 @@ function calculateEmiAmount() {
 
 // Function to update the UI based on part payment
 const updateUIBasedOnPartPayment = (isPartPaymentEnabled, partPayment) => {
+  // Get DOM elements
   const partPaymentHeader = document.getElementById("part_payment_hdr");
-  const totalPaymentHeader = document.getElementById("total_payment_hdr"); // Please replace with actual ID
-  const scheduledPaymentSection = document.querySelectorAll(".scheduled_payment_section");
+  const totalPaymentHeader = document.getElementById("total_payment_hdr");
   const frequencySelector = document.querySelectorAll("#frequency_selector input");
 
+  // Update Part Payment Header display property based on whether Part Payment is enabled
   partPaymentHeader.style.display = isPartPaymentEnabled ? "revert" : "none";
+
+  // Update Total Payment Header text based on whether Part Payment is enabled
   totalPaymentHeader.innerHTML = isPartPaymentEnabled ? "(A + B + C)" : "(A + B)";
 
-  // scheduledPaymentSection.forEach((item) => {
-  //   item.style.display = partPayment == "scheduled_plan" ? null : "none";
-  // });
-
+  // Update Frequency Selector items' disabled property based on whether the part payment plan is scheduled
   frequencySelector.forEach((item) => {
-    item.disabled = partPayment == "off";
+    item.disabled = partPayment !== "scheduled_plan";
   });
 
-  partPayInstallmentField.disabled = partPayment == "off";
+  // Update Part Payment Installment Field's disabled property and value based on whether the part payment plan is scheduled
+  partPayInstallmentField.disabled = partPayment !== "scheduled_plan";
+  if (partPayment !== "scheduled_plan") {
+    partPayInstallmentField.value = "";
+  }
 };
 
 /**
@@ -320,3 +334,27 @@ function writeFields(monthlyPayment, loanAmount, totalPayments, schedule, totalE
   totalInterestField.innerHTML = AMOUNT_FORMAT.format(Math.round(totalInterestPaid));
   whatYouSavedField.innerHTML = AMOUNT_FORMAT.format(whatYouSaved);
 }
+
+function setDefaultValues() {
+  loanAmountField.value = defaultValues.loanAmount;
+  interestRateField.value = defaultValues.interestRate;
+  loanPeriodField.value = defaultValues.loanPeriod;
+  loanStartDateField.value = defaultValues.loanStartDate;
+  partPayInstallmentField.value = defaultValues.partPayInstallment;
+  document.getElementById(defaultValues.partPayment).checked = true;
+  calculateEmiAmount();
+}
+
+function checkDefaultValues() {
+  const isDefault = loanAmountField.value === defaultValues.loanAmount && interestRateField.value === defaultValues.interestRate && loanPeriodField.value === defaultValues.loanPeriod && loanStartDateField.value === defaultValues.loanStartDate && partPayInstallmentField.value === defaultValues.partPayInstallment && document.getElementById(defaultValues.partPayment).checked;
+
+  document.getElementById("defaultValuesButton").style.display = isDefault ? "none" : "block";
+}
+
+setDefaultValues();
+
+// $(document).ready(function () {
+//   $("#loan_amount").inputmask("", {
+//     regex: "^[1-9][0-9]{0,2}(,[0-9]{2})*(,[0-9]{3})?$",
+//   });
+// });
