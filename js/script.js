@@ -26,6 +26,24 @@ const amortTableBody = amortTable.querySelector("tbody");
 // const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
 // const popoverList = [...popoverTriggerList].map((popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl));
 
+var interestRateRange = document.getElementById('interest_rate_range');
+var interestRateTicks = document.querySelector('.interest_rate_ticks');
+
+interestRateField.addEventListener('input', function() {
+  interestRateRange.value = interestRateField.value;
+});
+
+interestRateRange.addEventListener('input', function() {
+  interestRateField.value = interestRateRange.value;
+});
+
+for(let i = parseFloat(interestRateRange.min); i <= parseFloat(interestRateRange.max); i=i+5){
+  var tick = document.createElement('p');
+  tick.textContent = i;
+  interestRateTicks.appendChild(tick);
+}
+
+
 const currentDate = new Date()
   .toLocaleDateString("en-US", {
     year: "numeric",
