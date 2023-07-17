@@ -541,6 +541,7 @@ function writeFields(monthlyPayment, loanAmount, totalPayments, schedule, totalE
 function setDefaultValues() {
   loanAmountField.value = defaultValues.loanAmount;
   interestRateField.value = defaultValues.interestRate;
+  interestRateRange.value = defaultValues.interestRate;
   loanPeriodField.value = defaultValues.loanPeriod;
   loanStartDateField.value = defaultValues.loanStartDate;
   partPayInstallmentField.value = defaultValues.partPayInstallment;
