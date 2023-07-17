@@ -99,3 +99,11 @@ input[type="number"],
   width: 0px;
   background: #aaa;
 }
+
+.app-input {
+  width: 15rem;
+}
+
+#loan_start_date {
+  width: 3rem;
+}

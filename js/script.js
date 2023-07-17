@@ -26,23 +26,37 @@ const amortTableBody = amortTable.querySelector("tbody");
 // const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
 // const popoverList = [...popoverTriggerList].map((popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl));
 
-var interestRateRange = document.getElementById('interest_rate_range');
-var interestRateTicks = document.querySelector('.interest_rate_ticks');
+var interestRateRange = document.getElementById("interest_rate_range");
+var interestRateTicks = document.querySelector(".interest_rate_ticks");
+var loanPeriodRange = document.getElementById("loan_period_range");
+var loanPeriodTicks = document.querySelector(".loan_period_ticks");
+var loanAmountRange = document.getElementById("loan_amount_range");
+var loanAmountTicks = document.querySelector(".loan_amount_ticks");
 
-interestRateField.addEventListener('input', function() {
-  interestRateRange.value = interestRateField.value;
-});
+createRangeHandlers("interest_rate", "interest_rate_range", ".interest_rate_ticks", 5);
+createRangeHandlers("loan_period", "loan_period_range", ".loan_period_ticks", 3);
+createRangeHandlers(
+  "loan_amount",
+  "loan_amount_range",
+  ".loan_amount_ticks",
+  10000,
+  (value) => value / 1000 + "K",
+  AMOUNT_FORMAT.format,
+  (value) => formatInputValue(value)
+);
 
-interestRateRange.addEventListener('input', function() {
-  interestRateField.value = interestRateRange.value;
-});
-
-for(let i = parseFloat(interestRateRange.min); i <= parseFloat(interestRateRange.max); i=i+5){
-  var tick = document.createElement('p');
-  tick.textContent = i;
-  interestRateTicks.appendChild(tick);
+function areRequiredFieldsNotEmpty(fields) {
+  return fields.every(isFieldNotEmpty);
 }
 
+function isFieldNotEmpty(field) {
+  return Boolean(field.value);
+}
+
+// Function to format the input values
+const formatInputValue = (inputValue) => {
+  return Number(inputValue.replace(/,/g, ""));
+};
 
 const currentDate = new Date()
   .toLocaleDateString("en-US", {
@@ -61,249 +75,6 @@ const defaultValues = {
   partPayment: "off",
 };
 
-// Define pie chart colors and labels as constants
-const CHART_COLORS = ["#28a745", "#dd5182"];
-const CHART_LABELS = ["Principal Amount", "Total Interest"];
-let BAR_CHART_DATA = [];
-
-// Function to generate chart data
-const generatePieChartData = (data = [0, 0]) => {
-  return {
-    labels: CHART_LABELS,
-    datasets: [
-      {
-        data,
-        backgroundColor: CHART_COLORS,
-      },
-    ],
-  };
-};
-
-const generateBarChartData = (data = []) => {
-  // Group data by year and calculate the sum of principle, interest, and ending_balance for each year
-  let groupedData = data.reduce((acc, cur) => {
-    let year = cur.payment_date.split(" ")[1];
-    if (!acc[year]) {
-      acc[year] = {
-        principle: 0,
-        interest: 0,
-        ending_balance: Infinity, // set initial ending_balance to Infinity
-        loan_paid_percentage: 0,
-      };
-    }
-    acc[year].principle += parseInt(cur.principle.replace(",", ""));
-    acc[year].interest += parseInt(cur.interest);
-    let currentBalance = parseInt(cur.ending_balance.replace(",", ""));
-    acc[year].ending_balance = Math.min(acc[year].ending_balance, currentBalance); // update only if current balance is lower
-    acc[year].loan_paid_percentage = parseFloat(cur.loan_paid_percentage);
-    return acc;
-  }, {});
-
-  BAR_CHART_DATA = groupedData;
-
-  // Extract labels/dates
-  let labels = Object.keys(groupedData);
-
-  // Extract principle dataset
-  let principle = Object.values(groupedData).map((item) => item.principle);
-
-  // Extract interest dataset
-  let interest = Object.values(groupedData).map((item) => item.interest);
-
-  // Extract ending balance dataset
-  let ending_balance = Object.values(groupedData).map((item) => item.ending_balance);
-
-  return {
-    labels: labels,
-    datasets: [
-      {
-        order: 2,
-        label: "Principle",
-        yAxisID: "bar-y-axis", // specify the y-axis for the bar chart
-        data: principle,
-        backgroundColor: "rgb(25, 135, 84)",
-        stack: "combined",
-        type: "bar",
-        pointStyle: "rect",
-      },
-      {
-        order: 3,
-        label: "Interest",
-        yAxisID: "bar-y-axis", // specify the y-axis for the bar chart
-        data: interest,
-        backgroundColor: "rgb(220, 53, 69)",
-        stack: "combined",
-        type: "bar",
-        pointStyle: "triangle",
-      },
-      {
-        order: 1,
-        label: "Balance",
-        yAxisID: "line-y-axis", // specify the y-axis for the line chart
-        data: ending_balance,
-        borderColor: "rgb(108, 117, 125)",
-        backgroundColor: "white",
-        stack: "combined",
-        type: "line",
-        // pointStyle: "line",
-      },
-    ],
-  };
-};
-
-// Function to generate chart options
-const generatePieChartOptions = () => {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      datalabels: {
-        formatter: (value, ctx) => {
-          const dataArr = ctx.chart.data.datasets[0].data;
-          const sum = dataArr.reduce((a, b) => a + b, 0);
-          const percentage = ((value * 100) / sum).toFixed(2) + "%";
-          return percentage;
-        },
-        color: "#fff",
-        font: {
-          weight: "bold",
-        },
-      },
-      legend: {
-        position: "bottom",
-        labels: {
-          usePointStyle: true,
-          pointStyle: (context) => {
-            return "circle";
-          },
-        },
-      },
-      title: {
-        display: true,
-        text: "Break-up of Total Payment",
-      },
-    },
-  };
-};
-
-// Function to generate chart options
-const AMOUNT_LABELS = {
-  Principle: "Principle",
-  Interest: "Interest",
-  Balance: "Balance",
-};
-
-const TOOLTIP_STYLE = {
-  borderColor: "rgb(0, 0, 255)",
-  backgroundColor: "rgb(255, 0, 0)",
-  borderWidth: 2,
-  borderDash: [2, 2],
-  borderRadius: 2,
-};
-
-const createLabelStrings = (label, key, axisData) => {
-  if (label === AMOUNT_LABELS.Balance) {
-    return [`Year: ${key}`, `Balance: $${AMOUNT_FORMAT.format(axisData.ending_balance)}`, `Cumulative Repayment: ${(100 - axisData.loan_paid_percentage).toFixed(2)}%`];
-  }
-
-  return [`Year: ${key}`, `${label}: $${AMOUNT_FORMAT.format(axisData[label.toLowerCase()])}`, `Total Payment: $${AMOUNT_FORMAT.format(axisData.principle + axisData.interest)}`];
-};
-
-const generateBarChartOptions = () => {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      datalabels: {
-        color: "#fff",
-        font: { weight: "bold" },
-        display: false,
-      },
-      legend: {
-        position: "bottom",
-        labels: {
-          usePointStyle: true,
-        },
-      },
-      tooltip: {
-        usePointStyle: false,
-        displayColors: false,
-        callbacks: {
-          labelColor: (context) => TOOLTIP_STYLE,
-          labelTextColor: (context) => "#fff",
-          title: (context) => "",
-          label: (context) => {
-            const label = context.dataset.label || "";
-            const key = context.label;
-            const axisData = BAR_CHART_DATA[key];
-            return createLabelStrings(label, key, axisData);
-          },
-        },
-      },
-      title: {
-        display: true,
-        text: "Payment Per Year",
-      },
-    },
-    scales: {
-      "bar-y-axis": {
-        position: "right",
-        beginAtZero: false,
-        title: {
-          display: true,
-          text: "Principle and Interest",
-        },
-        grid: { display: false },
-      },
-      "line-y-axis": {
-        position: "left",
-        beginAtZero: false,
-        title: {
-          display: true,
-          text: "Balance",
-        },
-        grid: { display: false },
-      },
-    },
-  };
-};
-
-// Initialize the chart
-const pieChart = new Chart(document.getElementById("pie-chart-area"), {
-  type: "pie",
-  data: generatePieChartData(),
-  options: generatePieChartOptions(),
-  plugins: [ChartDataLabels],
-});
-
-const barChart = new Chart(document.getElementById("bar-chart-area"), {
-  type: "bar",
-  data: generateBarChartData(),
-  options: generateBarChartOptions(),
-  plugins: [ChartDataLabels],
-});
-
-console.log(barChart);
-
-// Function to update and render the chart
-const renderChart = (principle, interest, schedule) => {
-  pieChart.data.datasets[0].data = [principle, interest];
-  pieChart.update();
-
-  let barChartData = generateBarChartData(schedule);
-
-  // Update the labels of the chart
-  barChart.data.labels = barChartData.labels;
-
-  // Update each dataset in the chart
-  barChartData.datasets.forEach((dataset, i) => {
-    barChart.data.datasets[i].data = dataset.data;
-  });
-
-  // Update the chart to reflect the new data
-  barChart.update();
-};
-
 // month picker
 $(".monthpicker")
   .datepicker({
@@ -315,26 +86,16 @@ $(".monthpicker")
 
 // Set up event listeners
 loanAmountField.addEventListener("change", calculateEmiAmount);
+loanAmountRange.addEventListener("change", calculateEmiAmount);
 interestRateField.addEventListener("change", calculateEmiAmount);
+interestRateRange.addEventListener("change", calculateEmiAmount);
 loanPeriodField.addEventListener("change", calculateEmiAmount);
+loanPeriodRange.addEventListener("change", calculateEmiAmount);
 loanStartDateField.addEventListener("change", calculateEmiAmount);
 partPayInstallmentField.addEventListener("change", calculateEmiAmount);
 
 // Calculate EMI amount on document load
 window.addEventListener("DOMContentLoaded", calculateEmiAmount);
-
-function areRequiredFieldsNotEmpty(fields) {
-  return fields.every(isFieldNotEmpty);
-}
-
-function isFieldNotEmpty(field) {
-  return Boolean(field.value);
-}
-
-// Function to format the input values
-const formatInputValue = (inputValue) => {
-  return Number(inputValue.replace(/,/g, ""));
-};
 
 // Function to calculate the monthly payment
 const calculateMonthlyPayment = (loanAmount, interestRate, totalPayments) => {
@@ -543,6 +304,7 @@ function setDefaultValues() {
   interestRateField.value = defaultValues.interestRate;
   interestRateRange.value = defaultValues.interestRate;
   loanPeriodField.value = defaultValues.loanPeriod;
+  loanPeriodRange.value = defaultValues.loanPeriod;
   loanStartDateField.value = defaultValues.loanStartDate;
   partPayInstallmentField.value = defaultValues.partPayInstallment;
   document.getElementById(defaultValues.partPayment).checked = true;
@@ -555,10 +317,24 @@ function checkDefaultValues() {
   document.getElementById("defaultValuesButton").style.display = isDefault ? "none" : "block";
 }
 
-setDefaultValues();
+function createRangeHandlers(fieldID, rangeID, ticksClass, tickIncrement, tickFormatter = (value) => value, inputFormatter = (value) => value, rangeFormatter = (value) => value) {
+  var field = document.getElementById(fieldID);
+  var range = document.getElementById(rangeID);
+  var ticks = document.querySelector(ticksClass);
 
-// $(document).ready(function () {
-//   $("#loan_amount").inputmask("", {
-//     regex: "^[1-9][0-9]{0,2}(,[0-9]{2})*(,[0-9]{3})?$",
-//   });
-// });
+  field.addEventListener("input", function () {
+    range.value = rangeFormatter(field.value);
+  });
+
+  range.addEventListener("input", function () {
+    field.value = inputFormatter(range.value);
+  });
+
+  for (let i = parseFloat(range.min); i <= parseFloat(range.max); i += tickIncrement) {
+    var tick = document.createElement("p");
+    tick.textContent = tickFormatter(i);
+    ticks.appendChild(tick);
+  }
+}
+
+setDefaultValues();
