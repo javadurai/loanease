@@ -161,6 +161,24 @@ const populateExtraPaymentSchedule = (partPayment, partPayInstallment, totalPaym
   return extraPaymentSchedule;
 };
 
+function getPartPaymentSchedule(){
+  var result = [];
+
+  $(".extra_payments").each(function() {
+      var installmentNumber = $(this).data("index");
+      var partPayment = $(this).val();
+
+      result.push({
+          installmentNumber: installmentNumber,
+          partPayment: partPayment
+      });
+  });  
+
+  console.log(result)
+
+  return result;
+} 
+
 // Main function to calculate EMI amount
 function calculateEmiAmount() {
   // Validate input fields
@@ -175,11 +193,11 @@ function calculateEmiAmount() {
   const partPaymentsField = document.querySelector("input[name='part_payments']:checked");
   const partPaymentFrequency = partPaymentsField.value;
   const partPayInstallment = toNumber(partPayInstallmentField.value);
-  const customPartPaymentSchedule = [];
   const dateParts = loanStartDate.split("-");
   const nextPaymentDate = new Date(dateParts[1], MONTHS.indexOf(dateParts[0]), 1);
+  const customPartPaymentSchedule = getPartPaymentSchedule();
 
-  let { schedule, totalPartPayment, totalInterestPaid, moneySaved, monthlyPayment, totalAmount } = calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFrequency, partPayInstallment, nextPaymentDate, customPartPaymentSchedule);
+  let { schedule, totalPartPayment, totalInterestPaid, moneySaved, monthlyPayment, totalAmount } = calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFrequency, partPayInstallment, nextPaymentDate, customPartPaymentSchedule );
 
   // Check the default values on page load
   checkDefaultValues();
@@ -218,6 +236,11 @@ const updateUIBasedOnPartPayment = (partPaymentFrequency) => {
 
   // Update Part Payment Header display property based on whether Part Payment is enabled
   partPaymentHeader.style.display = partPaymentFrequency !== "off" ? "revert" : "none";
+
+  partPayInstallmentField.disabled = partPaymentFrequency === "off";
+  if(partPaymentFrequency === "off"){
+    partPayInstallmentField.value = "";
+  }
 
   // Update Total Payment Header text based on whether Part Payment is enabled
   totalPaymentHeader.innerHTML = partPaymentFrequency !== "off" ? "(A + B + C)" : "(A + B)";

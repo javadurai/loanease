@@ -53,13 +53,13 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
     if (partPaymentFrequency !== "off") {
       if (partPaymentFrequency === "monthly" || (partPaymentFrequency === "quarterly" && installmentNumber % 3 === 0) || (partPaymentFrequency === "yearly" && installmentNumber % 12 === 0)) {
         partPaymentMade = partPayment;
-      }
-    } else {
-      // find if there is a custom part payment for the current installment
-      let customPartPayment = customPartPaymentSchedule.find((x) => x.installmentNumber === installmentNumber);
-      if (customPartPayment) {
-        // convert the part payment amount to number
-        partPaymentMade = Number(customPartPayment.partPayment.replace(/[^0-9.-]+/g, ""));
+      } else if(partPaymentFrequency === "custom") {
+        // find if there is a custom part payment for the current installment
+        let customPartPayment = customPartPaymentSchedule.find((x) => x.installmentNumber === installmentNumber);
+        if (customPartPayment) {
+          // convert the part payment amount to number
+          partPaymentMade = Number(customPartPayment.partPayment.replace(/[^0-9.-]+/g, ""));
+        }
       }
     }
 
@@ -72,9 +72,13 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
       // increase the total part payment by the part payment
       totalPartPayment += partPaymentMade;
     }
+    console.log("----");
+    console.log(remainingLoanAmount);
+    console.log(principal );
 
     // reduce the remaining loan amount by the principal
     remainingLoanAmount -= principal;
+    console.log(remainingLoanAmount);
 
     // if the remaining loan amount is less than or equal to 0, make adjustments
     if (remainingLoanAmount <= 0) {
@@ -85,6 +89,10 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
       // set the remaining loan amount to 0
       remainingLoanAmount = 0;
     }
+
+    console.log(principal);
+    console.log(monthlyPayment);
+    console.log(monthlyInterest);
 
     // increase the total interest paid by the monthly interest
     totalInterestPaid += monthlyInterest;
