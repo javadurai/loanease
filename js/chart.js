@@ -25,12 +25,12 @@
 // Define constants
 const PIE_CHART_COLORS = ["#28a745", "#dd5182"];
 const PIE_CHART_LABELS = ["Principal Amount", "Total Interest"];
-const BAR_CHART_PRINCIPLE_COLOR = "rgb(25, 135, 84)";
+const BAR_CHART_principal_COLOR = "rgb(25, 135, 84)";
 const BAR_CHART_INTEREST_COLOR = "rgb(220, 53, 69)";
 const BAR_CHART_BALANCE_COLOR = "rgb(108, 117, 125)";
 const BAR_CHART_POINT_COLOR = "white";
 const AMOUNT_LABELS = {
-  Principle: "Principle",
+  principal: "principal",
   Interest: "Interest",
   Balance: "Balance",
 };
@@ -72,35 +72,35 @@ const constructPieChartData = (data = [0, 0]) => {
 
 // Function to accumulate and group data for bar chart by year
 const accumulateBarChartData = (data = []) => {
-  // Group data by year and calculate the sum of principle, interest, and ending_balance for each year
+  // Group data by year and calculate the sum of principal, monthlyInterest, and remainingLoanAmount for each year
   let groupedDataByYear = data.reduce((accumulator, currentValue) => {
-    let year = currentValue.payment_date.split(" ")[1];
+    let year = currentValue.installmentDate.split(" ")[1];
     if (!accumulator[year]) {
       accumulator[year] = {
-        principle: 0,
-        interest: 0,
-        ending_balance: Infinity, // set initial ending_balance to Infinity
+        principal: 0,
+        monthlyInterest: 0,
+        remainingLoanAmount: Infinity, // set initial remainingLoanAmount to Infinity
         loan_paid_percentage: 0,
       };
     }
-    accumulator[year].principle += parseInt(currentValue.principle.replace(",", ""));
-    accumulator[year].interest += parseInt(currentValue.interest);
-    let currentBalance = parseInt(currentValue.ending_balance.replace(",", ""));
-    accumulator[year].ending_balance = Math.min(accumulator[year].ending_balance, currentBalance); // update only if current balance is lower
+    accumulator[year].principal += parseInt(currentValue.principal.replace(",", ""));
+    accumulator[year].monthlyInterest += parseInt(currentValue.monthlyInterest);
+    let currentBalance = parseInt(currentValue.remainingLoanAmount.replace(",", ""));
+    accumulator[year].remainingLoanAmount = Math.min(accumulator[year].remainingLoanAmount, currentBalance); // update only if current balance is lower
     accumulator[year].loan_paid_percentage = parseFloat(currentValue.loan_paid_percentage);
     return accumulator;
   }, {});
 
   barChartYearlyData = groupedDataByYear;
-  // Extract labels/dates, principle, interest and ending_balance datasets
+  // Extract labels/dates, principal, monthlyInterest and remainingLoanAmount datasets
   let labels = Object.keys(groupedDataByYear);
-  let principle = Object.values(groupedDataByYear).map((item) => item.principle);
-  let interest = Object.values(groupedDataByYear).map((item) => item.interest);
-  let ending_balance = Object.values(groupedDataByYear).map((item) => item.ending_balance);
+  let principal = Object.values(groupedDataByYear).map((item) => item.principal);
+  let monthlyInterest = Object.values(groupedDataByYear).map((item) => item.monthlyInterest);
+  let remainingLoanAmount = Object.values(groupedDataByYear).map((item) => item.remainingLoanAmount);
 
   return {
     labels: labels,
-    datasets: [createBarChartDataset("Principle", BAR_CHART_PRINCIPLE_COLOR, "rect", principle, "bar-y-axis", 2, "combined", "bar"), createBarChartDataset("Interest", BAR_CHART_INTEREST_COLOR, "triangle", interest, "bar-y-axis", 3, "combined", "bar"), createBarChartDataset("Balance", BAR_CHART_BALANCE_COLOR, BAR_CHART_POINT_COLOR, ending_balance, "line-y-axis", 1, "combined", "line")],
+    datasets: [createBarChartDataset("principal", BAR_CHART_principal_COLOR, "rect", principal, "bar-y-axis", 2, "combined", "bar"), createBarChartDataset("Interest", BAR_CHART_INTEREST_COLOR, "triangle", monthlyInterest, "bar-y-axis", 3, "combined", "bar"), createBarChartDataset("Balance", BAR_CHART_BALANCE_COLOR, BAR_CHART_POINT_COLOR, remainingLoanAmount, "line-y-axis", 1, "combined", "line")],
   };
 };
 
@@ -142,10 +142,10 @@ const constructPieChartOptions = () => {
 // Helper function to generate chart options
 const createLabelStrings = (label, key, axisData) => {
   if (label === AMOUNT_LABELS.Balance) {
-    return [`Year: ${key}`, `Balance: $${AMOUNT_FORMAT.format(axisData.ending_balance)}`, `Cumulative Repayment: ${(100 - axisData.loan_paid_percentage).toFixed(2)}%`];
+    return [`Year: ${key}`, `Balance: $${AMOUNT_FORMAT.format(axisData.remainingLoanAmount)}`, `Cumulative Repayment: ${(100 - axisData.loan_paid_percentage).toFixed(2)}%`];
   }
 
-  return [`Year: ${key}`, `${label}: $${AMOUNT_FORMAT.format(axisData[label.toLowerCase()])}`, `Total Payment: $${AMOUNT_FORMAT.format(axisData.principle + axisData.interest)}`];
+  return [`Year: ${key}`, `${label}: $${AMOUNT_FORMAT.format(axisData[label.toLowerCase()])}`, `Total Payment: $${AMOUNT_FORMAT.format(axisData.principal + axisData.monthlyInterest)}`];
 };
 
 // Function to construct bar chart options
@@ -191,7 +191,7 @@ const constructBarChartOptions = () => {
         beginAtZero: false,
         title: {
           display: true,
-          text: "Principle and Interest",
+          text: "principal and Interest",
         },
         grid: { display: false },
       },
@@ -224,8 +224,8 @@ const barChart = new Chart(document.getElementById("bar-chart-area"), {
 });
 
 // Function to update and render the chart
-const renderChart = (principle, interest, schedule) => {
-  pieChart.data.datasets[0].data = [principle, interest];
+const renderChart = (principal, monthlyInterest, schedule) => {
+  pieChart.data.datasets[0].data = [principal, monthlyInterest];
   pieChart.update();
 
   let updatedBarChartData = accumulateBarChartData(schedule);
