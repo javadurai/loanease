@@ -78,13 +78,13 @@ const accumulateBarChartData = (data = []) => {
     if (!accumulator[year]) {
       accumulator[year] = {
         principal: 0,
-        monthlyInterest: 0,
+        interest: 0,
         remainingLoanAmount: Infinity, // set initial remainingLoanAmount to Infinity
         loanPaid: 0,
       };
     }
     accumulator[year].principal += parseInt(currentValue.principal.replace(",", ""));
-    accumulator[year].monthlyInterest += parseInt(currentValue.monthlyInterest);
+    accumulator[year].interest += parseInt(currentValue.monthlyInterest);
     let currentBalance = parseInt(currentValue.remainingLoanAmount.replace(",", ""));
     accumulator[year].remainingLoanAmount = Math.min(accumulator[year].remainingLoanAmount, currentBalance); // update only if current balance is lower
     accumulator[year].loanPaid = parseFloat(currentValue.loanPaid);
@@ -95,12 +95,12 @@ const accumulateBarChartData = (data = []) => {
   // Extract labels/dates, principal, monthlyInterest and remainingLoanAmount datasets
   let labels = Object.keys(groupedDataByYear);
   let principal = Object.values(groupedDataByYear).map((item) => item.principal);
-  let monthlyInterest = Object.values(groupedDataByYear).map((item) => item.monthlyInterest);
+  let interest = Object.values(groupedDataByYear).map((item) => item.interest);
   let remainingLoanAmount = Object.values(groupedDataByYear).map((item) => item.remainingLoanAmount);
 
   return {
     labels: labels,
-    datasets: [createBarChartDataset("principal", BAR_CHART_principal_COLOR, "rect", principal, "bar-y-axis", 2, "combined", "bar"), createBarChartDataset("Interest", BAR_CHART_INTEREST_COLOR, "triangle", monthlyInterest, "bar-y-axis", 3, "combined", "bar"), createBarChartDataset("Balance", BAR_CHART_BALANCE_COLOR, BAR_CHART_POINT_COLOR, remainingLoanAmount, "line-y-axis", 1, "combined", "line")],
+    datasets: [createBarChartDataset("principal", BAR_CHART_principal_COLOR, "rect", principal, "bar-y-axis", 2, "combined", "bar"), createBarChartDataset("Interest", BAR_CHART_INTEREST_COLOR, "triangle", interest, "bar-y-axis", 3, "combined", "bar"), createBarChartDataset("Balance", BAR_CHART_BALANCE_COLOR, BAR_CHART_POINT_COLOR, remainingLoanAmount, "line-y-axis", 1, "combined", "line")],
   };
 };
 
@@ -145,7 +145,7 @@ const createLabelStrings = (label, key, axisData) => {
     return [`Year: ${key}`, `Balance: $${AMOUNT_FORMAT.format(axisData.remainingLoanAmount)}`, `Cumulative Repayment: ${axisData.loanPaid.toFixed(2)}%`];
   }
 
-  return [`Year: ${key}`, `${label}: $${AMOUNT_FORMAT.format(axisData[label.toLowerCase()])}`, `Total Payment: $${AMOUNT_FORMAT.format(axisData.principal + axisData.monthlyInterest)}`];
+  return [`Year: ${key}`, `${label}: $${AMOUNT_FORMAT.format(axisData[label.toLowerCase()])}`, `Total Payment: $${AMOUNT_FORMAT.format(axisData.principal + axisData.interest)}`];
 };
 
 // Function to construct bar chart options
@@ -191,7 +191,7 @@ const constructBarChartOptions = () => {
         beginAtZero: false,
         title: {
           display: true,
-          text: "principal and Interest",
+          text: "Principal and Interest",
         },
         grid: { display: false },
       },
