@@ -77,13 +77,9 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
       // increase the total part payment by the part payment
       totalPartPayment += partPaymentMade;
     }
-    console.log("----");
-    console.log(remainingLoanAmount);
-    console.log(principal);
 
     // reduce the remaining loan amount by the principal
     remainingLoanAmount -= principal;
-    console.log(remainingLoanAmount);
 
     // if the remaining loan amount is less than or equal to 0, make adjustments
     if (remainingLoanAmount <= 0) {
@@ -94,10 +90,6 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
       // set the remaining loan amount to 0
       remainingLoanAmount = 0;
     }
-
-    console.log(principal);
-    console.log(monthlyPayment);
-    console.log(monthlyInterest);
 
     // increase the total interest paid by the monthly interest
     totalInterestPaid += monthlyInterest;
@@ -127,12 +119,6 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
     }
   }
 
-  console.log("--------------------------------");
-  console.log(monthlyPayment * months);
-  console.log(loanAmount);
-  console.log(totalInterestPaid);
-  console.log(totalPartPayment);
-
   // return the schedule and calculated totals
   return {
     schedule: schedule,
@@ -148,4 +134,4 @@ function toAmount(amount) {
   return new Intl.NumberFormat("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
 }
 
-console.log(calculateLoanSchedule(50000, 5.8, 48, "off", 0, new Date(), []));
+// console.log(calculateLoanSchedule(50000, 5.8, 48, "off", 0, new Date(), []));

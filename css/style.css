@@ -51,14 +51,14 @@ input[type="number"],
   font-family: "Righteous", cursive;
 }
 
-@media (min-width: 1400px) {
+/* @media (min-width: 1400px) {
   .container {
     max-width: 1140px;
   }
-}
+} */
 
 #bar-chart-container {
-  width: 68%;
+  width: 65%;
 }
 
 #pie-chart-container {
@@ -106,4 +106,12 @@ input[type="number"],
 
 #loan_start_date {
   width: 3rem;
+}
+
+@media screen and (max-width: 768px) {
+  .form-range-ticks,
+  .form-range,
+  .detailed-info {
+    display: none;
+  }
 }

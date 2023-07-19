@@ -154,8 +154,6 @@ function getPartPaymentSchedule() {
     });
   });
 
-  console.log(result);
-
   return result;
 }
 
@@ -239,7 +237,7 @@ function populateAmortTable(amortSchedule, partPaymentFrequency, amortTable, amo
           <tr class='text-center ${installment.partPaymentMade != "0" && partPaymentFrequency !== "off" ? "table-success" : ""}'>
             <td class='text-center'>${installment.installmentNumber}</td>
             <td class='text-center'>${installment.installmentDate}</td>
-            <td class='text-center'> $ ${installment.openingBalance}</td>
+            <td class='text-center detailed-info'> $ ${installment.openingBalance}</td>
             <td class='text-center mon_pay hide'> $ ${installment.monthlyPayment}</td>
             <td class='text-center'> $ ${installment.principal}</td>
             <td class='text-center'> $ ${installment.monthlyInterest}</td>
@@ -248,7 +246,7 @@ function populateAmortTable(amortSchedule, partPaymentFrequency, amortTable, amo
               <input value='${installment.partPaymentMade != "0" ? installment.partPaymentMade : ""}' type='text' data-index='${installment.installmentNumber}' class='form-control form-control-sm extra_payments numeric ${partPaymentFrequency === "custom" ? "" : "hide"}' /></td>
             <td class='text-center'> $ ${installment.monthlyPaymentWithPartPayment}</td>
             <td class='text-center'> $ ${installment.remainingLoanAmount}</td>
-            <td class='text-center'> ${installment.loanPaid} %</td>
+            <td class='text-center detailed-info'> ${installment.loanPaid} %</td>
           </tr>`;
     });
 
