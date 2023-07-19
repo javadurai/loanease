@@ -28,7 +28,7 @@ const loanPeriodField = document.querySelector("#loan_period");
 const loanStartDateField = document.querySelector("#loan_start_date");
 const partPayInstallmentField = document.querySelector("#part_payment_installment");
 const monthlyPaymentAmountField = document.querySelector("#monthly_installment");
-const numberOfPaymentsField = document.querySelector("#total_installments");
+const totalAmountPaidField = document.querySelector("#total_amount_paid");
 const actNumberOfPaymentsField = document.querySelector("#actual_installments_made");
 const totalExtraPaymentsField = document.querySelector("#total_prepayments_made");
 const totalInterestField = document.querySelector("#total_interest_payable");
@@ -61,13 +61,13 @@ const toNumber = (inputValue) => {
  * into their corresponding fields in the HTML.
  */
 function writeFields(monthlyPayment, loanAmount, totalPayments, scheduleSize, totalExtraPayments, totalInterestPaid, whatYouSaved) {
-  monthlyPaymentAmountField.innerHTML = monthlyPayment;
-  loanAmountField.value = AMOUNT_FORMAT.format(loanAmount);
-  numberOfPaymentsField.innerHTML = totalPayments;
+  monthlyPaymentAmountField.innerHTML = toAmount(monthlyPayment);
+  loanAmountField.value = toAmount(loanAmount);
+  totalAmountPaidField.innerHTML = toAmount(totalPayments);
   actNumberOfPaymentsField.innerHTML = scheduleSize;
-  totalExtraPaymentsField.innerHTML = totalExtraPayments;
-  totalInterestField.innerHTML = totalInterestPaid;
-  whatYouSavedField.innerHTML = whatYouSaved;
+  totalExtraPaymentsField.innerHTML = toAmount(totalExtraPayments);
+  totalInterestField.innerHTML = toAmount(totalInterestPaid);
+  whatYouSavedField.innerHTML = toAmount(whatYouSaved);
 }
 
 function setDefaultValues() {
@@ -141,43 +141,23 @@ createRangeHandlers(
   (value) => toNumber(value)
 );
 
-// Function to populate extra payment schedule
-const populateExtraPaymentSchedule = (partPayment, partPayInstallment, totalPayments, partPaymentFrequency, extraPaymentsList) => {
-  const extraPaymentSchedule = new Map();
-  const frequencyFactor = partPaymentFrequency == "monthly" ? 1 : partPaymentFrequency == "quarterly" ? 4 : 12;
-
-  if (partPayment == "scheduled_plan") {
-    for (let index = 0; index < totalPayments; index++) {
-      extraPaymentSchedule.set(index + 1, index % frequencyFactor == 0 ? partPayInstallment : null);
-    }
-  } else {
-    extraPaymentsList.forEach((payment) => {
-      if (isFieldNotEmpty(payment)) {
-        extraPaymentSchedule.set(Number(payment.getAttribute("data-index")) + 1, toNumber(payment.value));
-      }
-    });
-  }
-
-  return extraPaymentSchedule;
-};
-
-function getPartPaymentSchedule(){
+function getPartPaymentSchedule() {
   var result = [];
 
-  $(".extra_payments").each(function() {
-      var installmentNumber = $(this).data("index");
-      var partPayment = $(this).val();
+  $(".extra_payments").each(function () {
+    var installmentNumber = $(this).data("index");
+    var partPayment = $(this).val();
 
-      result.push({
-          installmentNumber: installmentNumber,
-          partPayment: partPayment
-      });
-  });  
+    result.push({
+      installmentNumber: installmentNumber,
+      partPayment: partPayment,
+    });
+  });
 
-  console.log(result)
+  console.log(result);
 
   return result;
-} 
+}
 
 // Main function to calculate EMI amount
 function calculateEmiAmount() {
@@ -197,7 +177,7 @@ function calculateEmiAmount() {
   const nextPaymentDate = new Date(dateParts[1], MONTHS.indexOf(dateParts[0]), 1);
   const customPartPaymentSchedule = getPartPaymentSchedule();
 
-  let { schedule, totalPartPayment, totalInterestPaid, moneySaved, monthlyPayment, totalAmount } = calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFrequency, partPayInstallment, nextPaymentDate, customPartPaymentSchedule );
+  let { schedule, totalPartPayment, totalInterestPaid, moneySaved, monthlyPayment, totalAmount } = calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFrequency, partPayInstallment, nextPaymentDate, customPartPaymentSchedule);
 
   // Check the default values on page load
   checkDefaultValues();
@@ -237,8 +217,8 @@ const updateUIBasedOnPartPayment = (partPaymentFrequency) => {
   // Update Part Payment Header display property based on whether Part Payment is enabled
   partPaymentHeader.style.display = partPaymentFrequency !== "off" ? "revert" : "none";
 
-  partPayInstallmentField.disabled = partPaymentFrequency === "off";
-  if(partPaymentFrequency === "off"){
+  partPayInstallmentField.disabled = partPaymentFrequency === "off" || partPaymentFrequency === "custom";
+  if (partPaymentFrequency === "off" || partPaymentFrequency === "custom") {
     partPayInstallmentField.value = "";
   }
 
@@ -249,24 +229,26 @@ const updateUIBasedOnPartPayment = (partPaymentFrequency) => {
 /**
  * The function populateAmortTable populates the amortization table based on the provided schedule.
  */
-function populateAmortTable(schedule, partPaymentFrequency, amortTable, amortTableBody) {
-  if (schedule.length > 0) {
+function populateAmortTable(amortSchedule, partPaymentFrequency, amortTable, amortTableBody) {
+  if (amortSchedule.length > 0) {
     amortTable.style.display = "revert";
 
     var tableBody = "";
-    schedule.forEach((schedule, index) => {
+    amortSchedule.forEach((installment, index) => {
       tableBody += `
-          <tr class='text-center ${schedule.partPaymentMade && partPaymentFrequency !== "off" ? "table-success" : ""}'>
-            <td class='text-center'>${schedule.installmentNumber}</td>
-            <td class='text-center'>${schedule.installmentDate}</td>
-            <td class='text-center'> $ ${schedule.openingBalance}</td>
-            <td class='text-center hide'> $ ${schedule.monthlyPayment}</td>
-            <td class='text-center'> $ ${schedule.principal}</td>
-            <td class='text-center'> $ ${schedule.monthlyInterest}</td>
-            <td class='extra_payment_col ${partPaymentFrequency !== "off" ? "" : "hide"}'><input value='${schedule.partPaymentMade}' type='text' data-index='${schedule.installmentNumber}' class='form-control form-control-sm extra_payments numeric' /></td>
-            <td class='text-center'> $ ${schedule.monthlyPaymentWithPartPayment}</td>
-            <td class='text-center'> $ ${schedule.remainingLoanAmount}</td>
-            <td class='text-center'> ${schedule.loanPaid} %</td>
+          <tr class='text-center ${installment.partPaymentMade != "0" && partPaymentFrequency !== "off" ? "table-success" : ""}'>
+            <td class='text-center'>${installment.installmentNumber}</td>
+            <td class='text-center'>${installment.installmentDate}</td>
+            <td class='text-center'> $ ${installment.openingBalance}</td>
+            <td class='text-center mon_pay hide'> $ ${installment.monthlyPayment}</td>
+            <td class='text-center'> $ ${installment.principal}</td>
+            <td class='text-center'> $ ${installment.monthlyInterest}</td>
+            <td class='extra_payment_col ${partPaymentFrequency !== "off" ? "" : "hide"}'>
+              <span class=' ${partPaymentFrequency !== "custom" ? "" : "hide"}'>$ ${installment.partPaymentMade} </span>
+              <input value='${installment.partPaymentMade != "0" ? installment.partPaymentMade : ""}' type='text' data-index='${installment.installmentNumber}' class='form-control form-control-sm extra_payments numeric ${partPaymentFrequency === "custom" ? "" : "hide"}' /></td>
+            <td class='text-center'> $ ${installment.monthlyPaymentWithPartPayment}</td>
+            <td class='text-center'> $ ${installment.remainingLoanAmount}</td>
+            <td class='text-center'> ${installment.loanPaid} %</td>
           </tr>`;
     });
 
@@ -274,56 +256,6 @@ function populateAmortTable(schedule, partPaymentFrequency, amortTable, amortTab
   } else {
     amortTable.style.display = "none";
   }
-}
-
-function calculateAmortizationSchedule(totalPayments, monthlyPayment, nextPaymentDate, interestRate, extraPaymentSchedule, isPartPaymentEnabled, loanAmount) {
-  let schedule = [];
-  let currentBalance = loanAmount;
-  let totalExtraPayments = 0;
-  let totalInterestPaid = 0;
-
-  for (let paymentNumber = 1; paymentNumber <= totalPayments; paymentNumber++) {
-    let currentPaymentAmount = Math.min(currentBalance, monthlyPayment);
-    nextPaymentDate = new Date(nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1));
-
-    let interestForThisMonth = currentBalance * interestRate;
-    totalInterestPaid += interestForThisMonth;
-
-    let extraPaymentThisMonth = extraPaymentSchedule.get(paymentNumber) || 0;
-    if (currentPaymentAmount + extraPaymentThisMonth > currentBalance - interestForThisMonth) {
-      extraPaymentThisMonth = currentBalance - (currentPaymentAmount - interestForThisMonth);
-    }
-
-    let totalPaymentThisMonth = currentPaymentAmount + (isPartPaymentEnabled ? extraPaymentThisMonth : 0);
-    totalExtraPayments += isPartPaymentEnabled ? extraPaymentThisMonth : 0;
-
-    const endingBalance = currentBalance - (totalPaymentThisMonth < monthlyPayment ? totalPaymentThisMonth : currentPaymentAmount - interestForThisMonth + (isPartPaymentEnabled ? extraPaymentThisMonth : 0));
-
-    let formattedEndingBalance = AMOUNT_FORMAT.format(Math.round(endingBalance));
-
-    schedule.push({
-      emi_number: paymentNumber,
-      payment_date: nextPaymentDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-      }),
-      beginning_balance: AMOUNT_FORMAT.format(Math.round(currentBalance)),
-      scheduled_payment: AMOUNT_FORMAT.format(currentPaymentAmount),
-      total_payment: AMOUNT_FORMAT.format(Math.round(totalPaymentThisMonth)),
-      principle: AMOUNT_FORMAT.format(Math.round(currentPaymentAmount - interestForThisMonth)),
-      interest: AMOUNT_FORMAT.format(Math.round(interestForThisMonth)),
-      extra_payment: extraPaymentSchedule.get(paymentNumber) != null ? AMOUNT_FORMAT.format(Math.round(extraPaymentThisMonth)) : "",
-      ending_balance: formattedEndingBalance,
-      loan_paid_percentage: ((endingBalance * 100) / loanAmount).toFixed(2),
-    });
-
-    if (currentBalance < monthlyPayment) break;
-
-    currentBalance = Number((currentBalance - (currentPaymentAmount - interestForThisMonth) - (isPartPaymentEnabled ? extraPaymentThisMonth : 0)).toFixed(2));
-    if (currentBalance <= 0) break;
-  }
-
-  return { schedule, totalInterestPaid, totalExtraPayments };
 }
 
 setDefaultValues();

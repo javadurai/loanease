@@ -80,14 +80,14 @@ const accumulateBarChartData = (data = []) => {
         principal: 0,
         monthlyInterest: 0,
         remainingLoanAmount: Infinity, // set initial remainingLoanAmount to Infinity
-        loan_paid_percentage: 0,
+        loanPaid: 0,
       };
     }
     accumulator[year].principal += parseInt(currentValue.principal.replace(",", ""));
     accumulator[year].monthlyInterest += parseInt(currentValue.monthlyInterest);
     let currentBalance = parseInt(currentValue.remainingLoanAmount.replace(",", ""));
     accumulator[year].remainingLoanAmount = Math.min(accumulator[year].remainingLoanAmount, currentBalance); // update only if current balance is lower
-    accumulator[year].loan_paid_percentage = parseFloat(currentValue.loan_paid_percentage);
+    accumulator[year].loanPaid = parseFloat(currentValue.loanPaid);
     return accumulator;
   }, {});
 
@@ -142,7 +142,7 @@ const constructPieChartOptions = () => {
 // Helper function to generate chart options
 const createLabelStrings = (label, key, axisData) => {
   if (label === AMOUNT_LABELS.Balance) {
-    return [`Year: ${key}`, `Balance: $${AMOUNT_FORMAT.format(axisData.remainingLoanAmount)}`, `Cumulative Repayment: ${(100 - axisData.loan_paid_percentage).toFixed(2)}%`];
+    return [`Year: ${key}`, `Balance: $${AMOUNT_FORMAT.format(axisData.remainingLoanAmount)}`, `Cumulative Repayment: ${axisData.loanPaid.toFixed(2)}%`];
   }
 
   return [`Year: ${key}`, `${label}: $${AMOUNT_FORMAT.format(axisData[label.toLowerCase()])}`, `Total Payment: $${AMOUNT_FORMAT.format(axisData.principal + axisData.monthlyInterest)}`];

@@ -24,7 +24,8 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
   // calculate the monthly interest rate
   const monthlyInterestRate = yearlyInterest / (12 * 100);
   // calculate the monthly payment using the loan payment formula
-  const monthlyPayment = Math.round((loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -months)));
+  //   const monthlyPayment = Math.round((loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -months)));
+  const monthlyPayment = (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -months));
 
   // remaining loan amount, starting with the initial full loan amount
   let remainingLoanAmount = loanAmount;
@@ -35,13 +36,15 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
   // the date of the first installment
   let installmentDate = new Date(startDate);
 
+  let totalPaymentToBePaid = 0;
+
   // array to hold the schedule
   let schedule = [];
 
   // loop through each month
   for (let installmentNumber = 1; installmentNumber <= months; installmentNumber++) {
     // calculate the interest for the current month
-    let monthlyInterest = Math.round(remainingLoanAmount * monthlyInterestRate);
+    let monthlyInterest = remainingLoanAmount * monthlyInterestRate;
     // calculate the principal for the current month
     let principal = monthlyPayment - monthlyInterest;
     // opening balance for the current month
@@ -49,11 +52,13 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
     // initialize part payment made in the current month
     let partPaymentMade = 0;
 
+    totalPaymentToBePaid += monthlyPayment;
+
     // check the part payment frequency
     if (partPaymentFrequency !== "off") {
       if (partPaymentFrequency === "monthly" || (partPaymentFrequency === "quarterly" && installmentNumber % 3 === 0) || (partPaymentFrequency === "yearly" && installmentNumber % 12 === 0)) {
         partPaymentMade = partPayment;
-      } else if(partPaymentFrequency === "custom") {
+      } else if (partPaymentFrequency === "custom") {
         // find if there is a custom part payment for the current installment
         let customPartPayment = customPartPaymentSchedule.find((x) => x.installmentNumber === installmentNumber);
         if (customPartPayment) {
@@ -74,7 +79,7 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
     }
     console.log("----");
     console.log(remainingLoanAmount);
-    console.log(principal );
+    console.log(principal);
 
     // reduce the remaining loan amount by the principal
     remainingLoanAmount -= principal;
@@ -85,7 +90,7 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
       // adjust the principal by adding the negative remaining loan amount
       principal += remainingLoanAmount;
       // increase the total interest paid by the monthly interest
-      totalInterestPaid += monthlyInterest;
+      //   totalInterestPaid += monthlyInterest;
       // set the remaining loan amount to 0
       remainingLoanAmount = 0;
     }
@@ -122,17 +127,25 @@ function calculateLoanSchedule(loanAmount, yearlyInterest, months, partPaymentFr
     }
   }
 
+  console.log("--------------------------------");
+  console.log(monthlyPayment * months);
+  console.log(loanAmount);
+  console.log(totalInterestPaid);
+  console.log(totalPartPayment);
+
   // return the schedule and calculated totals
   return {
     schedule: schedule,
-    totalPartPayment: toAmount(totalPartPayment),
+    totalPartPayment: totalPartPayment,
     totalInterestPaid: totalInterestPaid,
-    moneySaved: toAmount(monthlyPayment * months - (loanAmount + totalInterestPaid + totalPartPayment)),
-    monthlyPayment: toAmount(monthlyPayment),
-    totalAmount: toAmount(loanAmount + totalInterestPaid + totalPartPayment),
+    moneySaved: monthlyPayment * months - (loanAmount + totalInterestPaid),
+    monthlyPayment: monthlyPayment,
+    totalAmount: loanAmount + totalInterestPaid + totalPartPayment,
   };
 }
 
 function toAmount(amount) {
   return new Intl.NumberFormat("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
 }
+
+console.log(calculateLoanSchedule(50000, 5.8, 48, "off", 0, new Date(), []));
