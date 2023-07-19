@@ -1,0 +1,14 @@
+body * {
+  visibility: hidden;
+}
+
+.container,
+.container * {
+  visibility: visible;
+}
+
+.container {
+  position: absolute;
+  left: 0;
+  top: 0;
+}

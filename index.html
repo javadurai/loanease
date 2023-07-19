@@ -25,7 +25,9 @@
     integrity="sha512-34s5cpvaNG3BknEWSuOncX28vz97bRI59UnVtEEpFX536A7BtZSJHsDyFoCl8S7Dt2TPzcrCEoHBGeM4SUBDBw=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/style.css" type="text/css">
+  <link rel="stylesheet" href="./css/print.css" type="text/css" media="print" />
+
 
   <!-- Preconnects -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,6 +36,7 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Righteous&display=swap" rel="stylesheet">
 
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
@@ -41,10 +44,18 @@
 
 <body class="bg-secondary">
   <div class="container">
+    <div class="sticky-top d-flex justify-content-between" style="height: 0;">
+      <div>
+        <small><span class="badge bg-secondary"><i class="fas fa-code-branch"></i> 1.8</span></small>
+      </div>
+      <div class="mr-3 mt-3" id="defaultValuesButton">
+        <a href="#" onclick="setDefaultValues();" class="btn btn-secondary"><i class="fas fa-redo"></i></a>
+      </div>
+    </div>
+
 
     <div class="text-center">
       <h2 class="display-4 p-3 app-title"><i class="fas fa-hand-holding-usd"></i> LoanEase</h2>
-      <!-- <img src="img/logo.png" alt="LoanEase Logo" class="logo"> -->
       <h4 class="text-secondary">Your Personal Loan Repayment Schedule Planner</h4>
 
       <header>
@@ -74,179 +85,135 @@
 
     <hr>
     <main>
-      <div class="main-flex">
-        <div class="main-data-picker">
+      <div class="">
+        <div class="mr-2">
 
-          <table class="table-sm table-borderless" style="margin: auto;">
-            <tbody>
-              <tr>
-                <td class="align-middle">
-                  <label class="active" for="loan_amount">Principal Loan Amount</label>
-                </td>
-                <td>
-                  <div class="input-group">
-                    <div class="input-group-text">$</div>
-                    <input id="loan_amount" type="text" value="50,000" class="form-control form-control-sm numeric" />
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="align-middle">
-                  <label class="active" for="interest_rate">Annual Interest Rate</label>
-                </td>
-                <td>
-                  <div class="input-group">
-                    <div class="input-group-text">
-                      %
+          <div class="m-1">
+            <table class="table table-bordered  text-center">
+              <tbody>
+                <tr>
+                  <td colspan="8">
+                    <h6 class="card-title m-2"><i class="fas fa-wallet"></i> Principal Loan Amount</h6>
+                    <div class="input-group btn-group app-input" id="loan_amount_group">
+                      <div class="input-group-text">
+                        $
+                      </div>
+                      <input id="loan_amount" type="text" class="app-input form-control numeric" />
                     </div>
-                    <input id="interest_rate" type="text" value="11" class="form-control form-control-sm numeric" />
-                  </div>
-                </td>
-                </td>
-              </tr>
-              <tr>
-                <td class="align-middle">
-                  <label class="active" for="loan_period">Loan Term (Years)</label>
-                </td>
-                <td>
-                  <div class="input-group">
-                    <input id="loan_period" type="number" value="4" min="1"
-                      class="form-control form-control-sm numeric" />
-                  </div>
-
-                </td>
-              </tr>
-              <tr>
-                <td class="align-middle">
-                  <label class="active" for="loan_start_date">Loan Start Date</label>
-                </td>
-                <td>
-                  <div class="input-group date" id="load_start_date_group">
-                    <div class="input-group-text">
-                      <i class="fas fa-calendar-alt"></i>
+                    <input type="range" class="form-range" min="0" max="100000" step="500" id="loan_amount_range">
+                    <div class="form-range-ticks loan_amount_ticks"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4">
+                    <h6 class="card-title m-2"><i class="fas fa-list-ol"></i> Annual Interest Rate</h6>
+                    <input id="interest_rate" type="text"
+                      class="app-input btn-group form-control align-middle numeric" />
+                    <input type="range" class="form-range" min="0" max="25" step="0.1" id="interest_rate_range">
+                    <div class="form-range-ticks interest_rate_ticks"></div>
+                  </td>
+                  <td colspan="4">
+                    <h6 class="card-title m-2"><i class="fas fa-donate"></i> Loan Term (Years)</h6>
+                    <input id="loan_period" type="text" class="app-input btn-group form-control align-middle numeric" />
+                    <input type="range" class="form-range" min="0" max="15" step="1" id="loan_period_range">
+                    <div class="form-range-ticks loan_period_ticks"></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <h6 class="card-title m-2"><i class="fas fa-calendar-alt"></i> Loan Start Date</h6>
+                    <div class="input-group date btn-group app-input" id="load_start_date_group">
+                      <div class="input-group-text">
+                        &nbsp;<i class="fas fa-calendar-alt"></i>
+                      </div>
+                      <input id="loan_start_date" type="text" class="form-control form-control-sm monthpicker date"
+                        readonly data-bs-toggle="popover" data-bs-title="Loan Start Date"
+                        data-bs-content="The date the loan starts. By default, the current month and year are selected." />
                     </div>
-                    <input id="loan_start_date" type="text" class="form-control form-control-sm monthpicker date"
-                      readonly />
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="align-middle">
-                  <label class="active" for="total_interest">Part Payments</label>
-                </td>
-                <td>
-                  <div id="part_payment_selector" class="btn-group" role="group"
-                    aria-label="Basic radio toggle button group">
-                    <input type="radio" class="btn-check" name="part_payments" onchange="calculateEmiAmount()"
-                      value="off" id="off" autocomplete="off" checked>
-                    <label class="btn btn-secondary" for="off">None</label>
-                    <input type="radio" class="btn-check" name="part_payments" onchange="calculateEmiAmount()"
-                      value="scheduled_plan" id="scheduled_plan" autocomplete="off">
-                    <label class="btn btn-secondary" for="scheduled_plan">Scheduled Plan</label>
-                    <input type="radio" class="btn-check" name="part_payments" onchange="calculateEmiAmount()"
-                      value="custom_plan" id="custom_plan" autocomplete="off">
-                    <label class="btn btn-secondary" for="custom_plan">Custom Plan</label>
-                  </div>
-                </td>
-              </tr>
-              <tr class="scheduled_payment_section">
-                <td class="align-middle">
-                  <label class="active" for="total_interest">Schedule Frequency</label>
-                </td>
-                <td>
-                  <div id="frequency_selector" class="btn-group" role="group"
-                    aria-label="Basic radio toggle button group">
-                    <input type="radio" class="btn-check" name="schedule_frequecy" onchange="calculateEmiAmount()"
-                      value="monthly" id="monthly" autocomplete="off" checked>
-                    <label class="btn btn-secondary" for="monthly">Monthly</label>
-                    <input type="radio" class="btn-check" name="schedule_frequecy" onchange="calculateEmiAmount()"
-                      value="quarterly" id="quarterly" autocomplete="off">
-                    <label class="btn btn-secondary" for="quarterly">Quarterly</label>
-                    <input type="radio" class="btn-check" name="schedule_frequecy" onchange="calculateEmiAmount()"
-                      value="yearly" id="yearly" autocomplete="off">
-                    <label class="btn btn-secondary" for="yearly">Yearly</label>
-                  </div>
-                </td>
-              </tr>
-              <tr class="scheduled_payment_section">
-                <td class="align-middle">
-                  <label class="active" for="part_payment_installment">Part Payment Per Installment</label>
-                </td>
-                <td>
-                  <div class="input-group">
-                    <div class="input-group-text">
-                      $
+                  </td>
+                  <td colspan="4">
+                    <h6 class="card-title m-2"><i class="fas fa-check-square"></i> Part Payments</h6>
+                    <div id="part_payment_selector" class="btn-group" role="group"
+                      aria-label="Basic radio toggle button group">
+                      <input type="radio" class="btn-check" name="part_payments" onchange="calculateEmiAmount()"
+                        value="off" id="off" autocomplete="off" checked>
+                      <label class="btn btn-secondary" for="off">None</label>
+                      <input type="radio" class="btn-check" name="part_payments" onchange="calculateEmiAmount()"
+                        value="monthly" id="monthly" autocomplete="off" checked>
+                      <label class="btn btn-secondary" for="monthly">Monthly</label>
+                      <input type="radio" class="btn-check" name="part_payments" onchange="calculateEmiAmount()"
+                        value="quarterly" id="quarterly" autocomplete="off">
+                      <label class="btn btn-secondary" for="quarterly">Quarterly</label>
+                      <input type="radio" class="btn-check" name="part_payments" onchange="calculateEmiAmount()"
+                        value="yearly" id="yearly" autocomplete="off">
+                      <label class="btn btn-secondary" for="yearly">Yearly</label>
+                      <input type="radio" class="btn-check" name="part_payments" onchange="calculateEmiAmount()"
+                        value="custom" id="custom" autocomplete="off">
+                      <label class="btn btn-secondary" for="custom">Custom</label>
                     </div>
-                    <input id="part_payment_installment" type="text" class="form-control form-control-sm numeric" />
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="main-chart">
-          <div id="chart-container">
-            <canvas id="chart-area" />
+                  </td>
+                  <td colspan="2" class="hide">
+                    <h6 class="card-title m-2"><i class="fas fa-calendar-check"></i> Part Payment Frequency</h6>
+                    <div id="frequency_selector" class="btn-group" role="group"
+                      aria-label="Basic radio toggle button group">
+                      <input type="radio" class="btn-check" name="schedule_frequecy" onchange="calculateEmiAmount()"
+                        value="monthly" id="monthly" autocomplete="off" checked>
+                      <label class="btn btn-secondary" for="monthly">Monthly</label>
+                      <input type="radio" class="btn-check" name="schedule_frequecy" onchange="calculateEmiAmount()"
+                        value="quarterly" id="quarterly" autocomplete="off">
+                      <label class="btn btn-secondary" for="quarterly">Quarterly</label>
+                      <input type="radio" class="btn-check" name="schedule_frequecy" onchange="calculateEmiAmount()"
+                        value="yearly" id="yearly" autocomplete="off">
+                      <label class="btn btn-secondary" for="yearly">Yearly</label>
+                    </div>
+                  </td>
+                  <td colspan="2">
+                    <h6 class="card-title m-2"><i class="fas fa-coins"></i> Part Payment Per Installment</h6>
+                    <div class="input-group btn-group app-input">
+                      <div class="input-group-text">
+                        $
+                      </div>
+                      <input id="part_payment_installment" type="text" class="form-control form-control-sm numeric" />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+
         </div>
+
       </div>
     </main>
     <hr>
-
-    <section>
-      <div class="container text-center py-3">
-        <div class="row align-items-end">
-          <div class="col">
-            <div class="card border-primary">
-              <div class="card-header bg-primary text-white">
-                <h6 class="card-title m-2"><i class="fas fa-wallet"></i> Monthly Installment</h6>
-              </div>
-              <div class="card-body">
-                <h4 class="card-subtitle mb-2 text-primary">$<span id="monthly_installment"></span></h4>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card border-secondary">
-              <div class="card-header bg-secondary text-white">
-                <h6 class="card-title m-2"><i class="fas fa-list-ol"></i> Total Number of Installments</h6>
-              </div>
-              <div class="card-body">
-                <h4 class="card-subtitle mb-2 text-secondary"><span id="total_installments"></span></h4>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card border-success">
-              <div class="card-header bg-success text-white">
-                <h6 class="card-title m-2"><i class="fas fa-percent"></i> Total Interest Payable</h6>
-              </div>
-              <div class="card-body">
-                <h4 class="card-subtitle mb-2 text-success">$<span id="total_interest_payable"></span></h4>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <section id="early_payments_section">
       <div class="container text-center py-3">
         <div class="row align-items-end">
           <div class="col">
-            <div class="card border-success">
-              <div class="card-header bg-success text-white">
-                <h6 class="card-title m-2"><i class="fas fa-donate"></i> Total Prepayments Made</h6>
+            <div class="card border-secondary">
+              <div class="card-header bg-secondary text-white">
+                <h6 class="m-2"><i class="fas fa-hand-holding-usd text-white"></i> Total Prepayments</h6>
               </div>
               <div class="card-body">
-                <h4 class="card-subtitle mb-2 text-info">$<span id="total_prepayments_made"></span></h4>
+                <h4 class="card-subtitle mb-2 text-secondary">$<span id="total_prepayments_made"></span></h4>
               </div>
             </div>
           </div>
           <div class="col">
-            <div class="card border-info">
-              <div class="card-header bg-info text-white">
-                <h6 class="card-title m-2"><i class="fas fa-check-circle"></i> Actual Installments Made</h6>
+            <div class="card border-dark-subtle">
+              <div class="card-header bg-dark-subtle text-dark">
+                <h6 class="m-2"><i class="fas fa-percent text-dark"></i> Interest Payable</h6>
+              </div>
+              <div class="card-body">
+                <h4 class="card-subtitle mb-2 text-dark">$<span id="total_interest_payable"></span></h4>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border-success">
+              <div class="card-header bg-success text-white">
+                <h6 class="m-2"><i class="fas fa-check-circle text-white"></i> Completed Installments</h6>
               </div>
               <div class="card-body">
                 <h4 class="card-subtitle mb-2 text-success"><span id="actual_installments_made"></span></h4>
@@ -254,12 +221,32 @@
             </div>
           </div>
           <div class="col">
-            <div class="card border-primary">
-              <div class="card-header bg-primary text-white">
-                <h6 class="card-title m-2"><i class="fas fa-hand-holding-usd"></i> Total Savings</h6>
+            <div class="card border-info">
+              <div class="card-header bg-info text-dark">
+                <h6 class="m-2"><i class="fas fa-coins text-dark"></i> Savings Accumulated</h6>
               </div>
               <div class="card-body">
-                <h4 class="card-subtitle mb-2 text-primary">$<span id="total_savings"></span></h4>
+                <h4 class="card-subtitle mb-2 text-dark">$<span id="total_savings"></span></h4>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border-danger">
+              <div class="card-header bg-danger text-white">
+                <h6 class="m-2"><i class="fas fa-wallet text-white"></i> Monthly Installment</h6>
+              </div>
+              <div class="card-body">
+                <h4 class="card-subtitle mb-2 text-danger">$<span id="monthly_installment"></span></h4>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card border-primary">
+              <div class="card-header bg-primary text-white">
+                <h6 class="m-2"><i class="fas fa-credit-card text-white"></i> Total Repayments</h6>
+              </div>
+              <div class="card-body">
+                <h4 class="card-subtitle mb-2 text-primary"><span id="total_amount_paid"></span></h4>
               </div>
             </div>
           </div>
@@ -267,8 +254,19 @@
       </div>
     </section>
 
-    <hr>
 
+    <section>
+      <div class="chart-container ml-5 mr-5 bg-light">
+        <div id="bar-chart-container" class="border">
+          <canvas id="bar-chart-area" />
+        </div>
+        <div id="pie-chart-container" class="border">
+          <canvas id="pie-chart-area" />
+        </div>
+      </div>
+    </section>
+
+    <hr>
 
     <section>
       <div id="amortization_table" class="align-middle">
@@ -348,6 +346,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"
     integrity="sha512-LsnSViqQyaXpD4mBBdRYeP6sRwJiJveh2ZIbW41EBrNmKxgr/LFZIiWT6yr+nycvhvauz8c2nYMhrP80YhG7Cw=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"
+    integrity="sha512-efAcjYoYT0sXxQRtxGY37CKYmqsFVOIwMApaEbrxJr4RwqVVGw8o+Lfh/+59TU07+suZn1BWq4fDl5fdgyCNkw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="./js/chart.js"></script>
+  <script src="./js/calc.js"></script>
   <script src="./js/script.js"></script>
 
 </body>

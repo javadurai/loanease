@@ -22,7 +22,8 @@ input[type="number"],
 }
 
 .main-flex,
-.loan-calculation-header {
+.loan-calculation-header,
+.chart-container {
   display: flex;
   width: 100%;
 }
@@ -54,4 +55,55 @@ input[type="number"],
   .container {
     max-width: 1140px;
   }
+}
+
+#bar-chart-container {
+  width: 68%;
+}
+
+#pie-chart-container {
+  width: 35%;
+}
+
+.form-range::-webkit-slider-thumb {
+  background-color: var(--bs-secondary);
+}
+
+.form-range::-moz-range-thumb {
+  background-color: var(--bs-secondary);
+}
+
+.form-range::-webkit-slider-runnable-track {
+  background: var(--bs-secondary);
+}
+
+.form-range::-moz-range-progress {
+  background: var(--bs-secondary);
+}
+
+.form-range::-moz-range-track {
+  background: lightgray;
+}
+
+.form-range-ticks {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.form-range-ticks p {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  width: 0px;
+  background: #aaa;
+}
+
+.app-input {
+  width: 15rem;
+}
+
+#loan_start_date {
+  width: 3rem;
 }
